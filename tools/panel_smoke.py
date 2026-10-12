@@ -242,7 +242,7 @@ def main():
                         errs.append('charts: group did not fold')
                 pctx.close()
             if scen == 'full' and lang == 'en':   # cards fold by their title, "collapse all" / "expand all", and the choice survives a reload
-                for tab, grid in (('readings', 'readGrid'), ('diag', 'diagGrid'), ('calibration', 'calGrid')):
+                for tab, grid in (('readings', 'readGrid'), ('calibration', 'calGrid')):
                     page.click('nav.tabs button[data-tab="%s"]' % tab)
                     page.wait_for_timeout(300)
                     ncards = page.eval_on_selector_all('#%s .card' % grid, 'e => e.length')

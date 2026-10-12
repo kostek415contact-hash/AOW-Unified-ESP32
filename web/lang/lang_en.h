@@ -867,6 +867,8 @@ static const char WEB_LANG_EN[] PROGMEM = R"LANG(window.AOG_CAT=window.AOG_CAT||
   "charts": "Charts",
   "diagnostics": "Diagnostics",
   "calibration": "Calibration",
+  "calibration_invalid": "calibration invalid",
+  "kickout_active": "current cut-off",
   "settings": "Settings",
   "log": "Log",
   "loading": "loading…",

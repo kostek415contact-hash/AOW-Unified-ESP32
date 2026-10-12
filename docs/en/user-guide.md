@@ -31,7 +31,7 @@ Every live value in one place: GPS position and accuracy, speed and heading, inp
 who controls it (AgOpenWeb or manual) and has the Raise / Lower / Auto buttons. Raise and Lower ask for confirmation; Auto
 always works, and a restart always returns to automatic.
 
-In Readings, Diagnostics and Calibration a card folds when you tap its title; **Collapse all** / **Expand all** above the cards do it for the whole tab, and the browser remembers your choice. Long explanations everywhere are folded under **Details**.
+In Readings and Calibration a card folds when you tap its title; **Collapse all** / **Expand all** above the cards do it for the whole tab, and the browser remembers your choice. Long explanations everywhere are folded under **Details**.
 
 ## Charts
 

@@ -38,7 +38,7 @@ function buildDiag(){
     cardsDiag[key]={c,body,off,input,list,extra,d,jf};
     g.appendChild(c);
   });
-  foldLong($('#tab-diag'));cardFolding(g);
+  foldLong($('#tab-diag'));
 }
 async function saveFlags(){
   flagPending=true;
@@ -104,14 +104,14 @@ function readiness(s){
   else if(s.ntripEnabled)add(TL('rtk_corrections'),s.ntripStreaming?'ok':'warn',s.ntripStreaming?TL('flowing'):TL('connecting'),'readings');
   else if(s.rtcmSource===2)add(TL('rtk_corrections'),'ok',TL('flowing_via_agopenweb'),'readings');
   else add(TL('rtk_corrections'),'muted',TL('ntrip_off'),'readings');
-  add(TL('angle_sensor'),!s.steerSensorOk?'bad':s.steerCalOk===false?'bad':'ok',!s.steerSensorOk?TL('no_reading'):s.steerCalOk===false?'calibration':f(s.steerAngleDeg,1,'°'),'calibration');
+  add(TL('angle_sensor'),!s.steerSensorOk?'bad':s.steerCalOk===false?'bad':'ok',!s.steerSensorOk?TL('no_reading'):s.steerCalOk===false?TL('calibration_invalid'):f(s.steerAngleDeg,1,'°'),'calibration');
   if(s.enImu)add('IMU',s.imuConnected?'ok':'bad',s.imuConnected?'OK':TL('none_2'),'diag');
   if(!s.motorDriverEn)add(TL('motor'),'muted',TL('disabled'),'calibration');
   else{
     const rs=isNum(s.runState)?s.runState:0,cs=(s.currentSensEn&&isNum(s.currState))?s.currState:2;
     const unarmed=s.motorArmed===false;   // after a restart the motor stays still until steering was seen OFF; engaged + unarmed = it will not move
     const bad=rs>=2||cs===3||cs===4||(unarmed&&!!s.cmdEngaged),warn=!bad&&(cs===1||!!s.kickoutActive||unarmed||motorSettingsMissing(s));
-    add(TL('motor'),bad?'bad':warn?'warn':'ok',rs>=2?TL('stop_protection'):cs===3?TL('overcurrent_2'):cs===4?TL('current_sensor_error'):unarmed?TL('not_armed_switch_steering_off_and_on'):cs===1?TL('no_current_data'):s.kickoutActive?'kickout':motorSettingsMissing(s)?TL('no_settings_from_aow'):TL('healthy'),'calibration');
+    add(TL('motor'),bad?'bad':warn?'warn':'ok',rs>=2?TL('stop_protection'):cs===3?TL('overcurrent_2'):cs===4?TL('current_sensor_error'):unarmed?TL('not_armed_switch_steering_off_and_on'):cs===1?TL('no_current_data'):s.kickoutActive?TL('kickout_active'):motorSettingsMissing(s)?TL('no_settings_from_aow'):TL('healthy'),'calibration');
   }
   if(s.sectionExpCfg&&!s.sectionExpEn)add(TL('section_expander'),'warn',TL('not_responding'),'diag');
   const bads=k.filter(x=>x.c==='bad').length,warns=k.filter(x=>x.c==='warn').length;
