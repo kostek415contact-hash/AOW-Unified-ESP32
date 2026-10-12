@@ -50,6 +50,7 @@ function showTab(t,noHash){t=LEGACY_TABS[t]||t;
   if(!TABS.includes(t))t='status';curTab=t;try{localStorage.setItem('aog.tab',t);}catch(e){}
   $$('.tab').forEach(e=>e.classList.toggle('active',e.id==='tab-'+t));
   $$('#nav button').forEach(b=>{const on=b.dataset.tab===t;b.classList.toggle('active',on);if(on)b.setAttribute('aria-current','page');else b.removeAttribute('aria-current');});
+  try{const ab=$('#nav button.active');if(ab&&ab.scrollIntoView)ab.scrollIntoView({block:'nearest',inline:'center'});}catch(e){}
   if(!noHash&&location.hash!=='#'+t)history.replaceState(null,'','#'+t);
   window.scrollTo(0,0);if(S)updStrip(S);renderCurrent();MAS.forEach(id=>masonry(id,true));masonryWatch();clearTimeout(masT);masT=setTimeout(()=>{MAS.forEach(id=>masonry(id,true,true));masonryWatch();},700);if(t==='log'){renderLog(true);pollLog();}
 }

@@ -204,6 +204,10 @@ def main():
                 pp.wait_for_timeout(200)
                 if pp.eval_on_selector_all('#setGrid .secbox.shut', 'e => e.length') != nsec - 2:
                     errs.append('settings search: clearing did not restore the folded sections')
+                pp.evaluate("(()=>{const i=document.querySelector('#setGrid .secbox:not(.shut) .setsec > .card input');i.dispatchEvent(new Event('change',{bubbles:true}));})()")
+                pp.wait_for_timeout(200)
+                if pp.eval_on_selector_all('#setGrid .recent .pill', 'e => e.length') != 1:
+                    errs.append('recently edited: no shortcut after changing a setting')
                 pp.click('#setGrid .setbar button:nth-of-type(1)')
                 if pp.eval_on_selector_all('#setGrid .secbox.shut', 'e => e.length') != nsec:
                     errs.append('settings: collapse all did not fold every section')
@@ -220,8 +224,10 @@ def main():
                 pp.wait_for_timeout(300)
                 if not pp.eval_on_selector('#rstrip', 'e => e.hidden'):
                     errs.append('ready strip: still visible on the Status tab')
-                # field mode
+                # field mode (on a phone the tab bar scrolls sideways instead of squeezing seven big tabs)
                 pp.click('#fieldBtn')
+                if pp.evaluate("(()=>{const n=document.querySelector('nav.tabs');return n.scrollWidth>n.clientWidth&&n.getBoundingClientRect().width<=window.innerWidth;})()") is not True:
+                    errs.append('field mode: tab bar neither scrolls nor fits on a phone')
                 if not pp.evaluate("document.documentElement.classList.contains('fm')"):
                     errs.append('field mode: class not set')
                 pp.reload()
@@ -240,6 +246,13 @@ def main():
                     pp.click('#chGrid h2.fh2')
                     if not pp.eval_on_selector('#chGrid h2.fh2 + .grid', 'e => e.hidden'):
                         errs.append('charts: group did not fold')
+                pp.click('nav.tabs button[data-tab="log"]')
+                pp.wait_for_timeout(400)
+                if 'Copy report' not in pp.eval_on_selector('#logbar', 'e => e.textContent'):
+                    errs.append('log: "Copy report" button missing')
+                over = pp.evaluate('document.documentElement.scrollWidth-document.documentElement.clientWidth')
+                if over > 0:
+                    errs.append('phone log: horizontal overflow %d px' % over)
                 pctx.close()
             if scen == 'full' and lang == 'en':   # cards fold by their title, "collapse all" / "expand all", and the choice survives a reload
                 for tab, grid in (('readings', 'readGrid'), ('calibration', 'calGrid')):

@@ -12,7 +12,7 @@ Handy details: the panel reopens on the tab you used last. On every tab except S
 "Ready to drive" (or the first things that are not ready); tap it to open Status. The **A+** button in the header switches
 field mode (larger buttons, inputs and tabs for use in a tractor cab); it is remembered in the browser. In Settings the
 categories (Network, AgOpenWeb connection, ...) fold by tapping their title - only the first starts open - and the search box
-at the top filters the settings by name or description.
+at the top filters the settings by name or description; the last five cards you edited appear above them as shortcuts ("Recently edited"). On a phone, field mode makes the tab bar scroll sideways. The Log tab has **Diagnostic report** (download) and **Copy report** (to the clipboard, secrets hidden) for bug reports.
 
 ## Status
 

@@ -5,7 +5,7 @@ Format based on [Keep a Changelog](https://keepachangelog.com/); versions are `m
 ## [Unreleased]
 
 ### Added
-- Panel: remembers the last opened tab; a slim "Ready to drive" bar (verdict plus the first problems) under the header on every tab except Status; field mode (header button **A+**, larger controls, remembered); search box in Settings; Settings categories fold on all screens (first open, choice remembered) with Collapse all / Expand all; chart groups fold; Log toolbar is a single scrollable row on a phone. Checked by the browser smoke test.
+- Panel: remembers the last opened tab; a slim "Ready to drive" bar (verdict plus the first problems) under the header on every tab except Status; field mode (header button **A+**, larger controls, remembered); search box in Settings; Settings categories fold on all screens (first open, choice remembered) with Collapse all / Expand all; chart groups fold; "Recently edited" shortcuts above the Settings sections; "Copy report" button next to the diagnostic report download (Log); in field mode on a phone the tab bar scrolls sideways so the tabs can be large; two status texts ("calibration", "kickout") are now translated; Log toolbar is a single scrollable row on a phone. Checked by the browser smoke test.
 
 ### Changed
 - Panel: cards in Readings and Calibration fold by tapping their title (chevron on the right; Diagnostics cards stay always open), with "Collapse all" / "Expand all" buttons above them; the choice is remembered in the browser. Long notes and hints in Diagnostics, Calibration and Settings fold under "Details" (warnings and status messages stay visible). Checked by the browser smoke test (fold, reload, collapse / expand all).

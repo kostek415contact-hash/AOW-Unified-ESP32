@@ -110,6 +110,18 @@ html.fm .tile .tn{font-size:13.5px}
 html.fm .tile .ts{font-size:24px}
 html.fm .tile .tsub{font-size:14px}
 html.fm nav.tabs button{min-height:68px;font-size:12.5px}
+@media(max-width:799px){
+  /* phone: seven tabs do not fit in larger letters, so the bar scrolls sideways (about 4 tabs visible) and the active tab is brought into view */
+  html.fm nav.tabs{overflow-x:auto;overflow-y:hidden;justify-content:flex-start;scrollbar-width:none;-webkit-overflow-scrolling:touch}
+  html.fm nav.tabs::-webkit-scrollbar{display:none}
+  html.fm nav.tabs button{flex:0 0 auto;min-width:96px;min-height:76px;font-size:15px;gap:5px;padding:10px 8px 8px}
+  html.fm nav.tabs .ico{width:30px;height:30px}
+  html.fm main{padding-bottom:110px}
+}
+.recent{display:flex;gap:6px;flex-wrap:wrap;align-items:center;margin:0 0 8px}
+.recent .rl{color:var(--label);font-size:12.5px;margin-right:2px}
+@keyframes flash{0%{box-shadow:0 0 0 3px var(--accent)}100%{box-shadow:0 0 0 0 transparent}}
+.card.flash{animation:flash 1.6s ease-out}
 html.fm .sw{transform:scale(1.3);transform-origin:right center}
 html.fm .secbox>.sech,html.fm h2.fh2{font-size:20px;padding:10px 0}
 html.fm .rstrip{min-height:36px;font-size:15px}

@@ -16,6 +16,7 @@ function buildLog(){
   const cp=document.createElement('button');cp.className='pill';cp.textContent=TL('copy');cp.onclick=copyLog;bar.appendChild(cp);
   const dl=document.createElement('button');dl.className='pill';dl.textContent=TL('download');dl.onclick=()=>{const a=document.createElement('a');a.href=URL.createObjectURL(new Blob([logRaw.split('\n').map(logTr).join('\n')],{type:'text/plain'}));a.download='aog-log.txt';a.click();setTimeout(()=>URL.revokeObjectURL(a.href),1000);};bar.appendChild(dl);
   const dr=document.createElement('button');dr.className='pill';dr.textContent=TL('diagnostic_report');dr.onclick=downloadDiagReport;bar.appendChild(dr);
+  const cr=document.createElement('button');cr.className='pill';cr.textContent=TL('copy_report');cr.onclick=()=>copyText(diagReport(S,logRaw,EVT),TL('report_copied'));bar.appendChild(cr);
 }
 /* One text file for a bug report: versions, the readiness verdict, the whole /status (secrets removed), recent events and the log in the
    firmware's own English. Nothing leaves the browser except the file the user chooses to send. */
@@ -39,11 +40,11 @@ function downloadDiagReport(){
   document.body.appendChild(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(a.href),1500);
   toast(TL('diagnostic_report_downloaded'),'ok');
 }
-function copyLog(){
-  const txt=logShown||logRaw;
-  const done=()=>toast(TL('log_copied'),'ok');
+function copyText(txt,msg){
+  const done=()=>toast(msg,'ok');
   if(navigator.clipboard&&window.isSecureContext){navigator.clipboard.writeText(txt).then(done,()=>fallbackCopy(txt,done));}else fallbackCopy(txt,done);
 }
+function copyLog(){copyText(logShown||logRaw,TL('log_copied'));}
 function fallbackCopy(t,done){const ta=document.createElement('textarea');ta.value=t;ta.style.position='fixed';ta.style.opacity='0';document.body.appendChild(ta);ta.select();try{document.execCommand('copy');done();}catch(e){toast(TL('copy_failed'),'bad');}ta.remove();}
 function renderLog(force){
   const el=$('#log');const re=LOGF[logFilter];

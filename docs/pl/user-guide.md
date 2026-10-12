@@ -12,7 +12,7 @@ Przydatne drobiazgi: panel otwiera się na ostatnio używanej zakładce. Na każ
 pokazuje „Gotowy do jazdy” (albo pierwsze rzeczy, które nie są gotowe); dotknięcie otwiera Status. Przycisk **A+** w nagłówku
 włącza tryb terenowy (większe przyciski, pola i zakładki do używania w kabinie); jest zapamiętywany w przeglądarce. W Ustawieniach
 kategorie (Sieć, Połączenie z AgOpenWeb, ...) zwijają się po dotknięciu tytułu - otwarta jest tylko pierwsza - a pole wyszukiwania
-na górze filtruje ustawienia po nazwie lub opisie.
+na górze filtruje ustawienia po nazwie lub opisie; pięć ostatnio edytowanych kart pojawia się nad nimi jako skróty („Ostatnio edytowane”). Na telefonie tryb terenowy sprawia, że pasek zakładek przewija się na boki. Zakładka Dziennik ma **Raport diagnostyczny** (pobranie) i **Kopiuj raport** (do schowka, bez haseł) do zgłaszania błędów.
 
 ## Status
 

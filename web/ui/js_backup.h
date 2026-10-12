@@ -190,7 +190,31 @@ function setSection(root,id,title,desc){
 }
 /* Search bar above the sections: filters the cards by their text (titles, labels, hints, placeholders); matching sections open,
    the rest hide. Clearing it restores the folded / open state from before the search. Two buttons fold / unfold all sections. */
-function setSearchBar(root,nav){
+/* "Recently edited": the last few settings cards the user changed an input in (this browser only); a button jumps to the card. */
+const RECENT_KEY='aog.recent';
+function recentLoad(){try{const a=JSON.parse(localStorage.getItem(RECENT_KEY)||'[]');return Array.isArray(a)?a:[];}catch(e){return [];}}
+function setRecent(root,nav){
+  const bar=el('div','recent');
+  const draw=()=>{
+    bar.textContent='';const list=recentLoad().filter(r=>r&&r.s&&r.t);bar.hidden=!list.length;if(!list.length)return;
+    bar.appendChild(el('span','rl',TL('recent_settings')));
+    list.forEach(r=>{const b=el('button','pill',r.t);b.type='button';b.onclick=()=>{
+      const h=document.getElementById('sec-'+r.s);if(!h)return;setSecToggle(h.parentNode,true,true);
+      const c=[...h.parentNode.querySelectorAll('.setsec > .card')].find(x=>{const t=x.querySelector('h3');return t&&t.textContent===r.t;});
+      const tg=c||h;tg.scrollIntoView({behavior:'smooth',block:'start'});if(c){c.classList.remove('flash');void c.offsetWidth;c.classList.add('flash');}};bar.appendChild(b);});
+  };
+  root.addEventListener('change',e=>{
+    const c=e.target.closest&&e.target.closest('.setsec > .card');if(!c)return;const h3=c.querySelector('h3'),box=c.closest('.secbox');
+    if(!h3||!box||e.target.type==='search')return;
+    const t=h3.textContent,s=box.dataset.sid;
+    const a=recentLoad().filter(r=>!(r&&r.s===s&&r.t===t));a.unshift({s,t});
+    try{localStorage.setItem(RECENT_KEY,JSON.stringify(a.slice(0,5)));}catch(x){}
+    draw();
+  });
+  root.insertBefore(bar,nav);draw();
+  return bar;
+}
+function setSearchBar(root,nav,rec){
   const bar=el('div','setbar'),inp=document.createElement('input');
   inp.type='search';inp.placeholder=TL('search_settings');inp.setAttribute('aria-label',TL('search_settings'));inp.autocomplete='off';
   const none=el('div','nomatch',TL('no_settings_found'));none.hidden=true;
@@ -202,10 +226,10 @@ function setSearchBar(root,nav){
     if(!q){
       if(before){boxes().forEach((b,i)=>{b.hidden=false;setSecToggle(b,!before[i],false);});before=null;}
       root.querySelectorAll('.setsec > .card').forEach(c=>{c.hidden=false;});
-      nav.hidden=false;none.hidden=true;return;
+      nav.hidden=false;if(rec)rec.hidden=!recentLoad().length;none.hidden=true;return;
     }
     if(!before)before=boxes().map(b=>b.classList.contains('shut'));
-    nav.hidden=true;let any=false;
+    nav.hidden=true;if(rec)rec.hidden=true;let any=false;
     boxes().forEach(b=>{
       let hit=0;
       b.querySelectorAll('.setsec > .card').forEach(c=>{const m=textOf(c).indexOf(q)>=0;c.hidden=!m;if(m)hit++;});
@@ -218,7 +242,7 @@ function setSearchBar(root,nav){
   const mk=(txt,open)=>{const b=el('button','pill',txt);b.type='button';
     b.onclick=()=>{if(inp.value){inp.value='';run();}boxes().forEach(x=>setSecToggle(x,open,true));};return b;};
   bar.append(inp,mk(TL('collapse_all'),false),mk(TL('expand_all'),true));
-  root.insertBefore(bar,nav);root.appendChild(none);
+  root.insertBefore(bar,rec||nav);root.appendChild(none);
   return run;
 }
 /* Long explanations fold under "Details" (a tap opens them). Status messages and warnings (bad / warn classes, hidden ones) stay visible. */
@@ -345,7 +369,8 @@ function buildSet(){
   // jump chips on top + folding of the long explanations
   SETSEC.forEach(([id,t])=>{const b=el('button','pill',t);b.onclick=()=>{const h=document.getElementById('sec-'+id);if(!h)return;setSecToggle(h.parentNode,true,true);h.scrollIntoView({behavior:'smooth',block:'start'});};nav.appendChild(b);});
   foldLong(root);
-  setSearchBar(root,nav);
+  const rec=setRecent(root,nav);
+  setSearchBar(root,nav,rec);
 }
 let settingsFilled=false;
 function fillSettings(s,force){
