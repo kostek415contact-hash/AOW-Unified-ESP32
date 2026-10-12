@@ -8,6 +8,12 @@ Panel to strona WWW serwowana przez sam moduł - bez aplikacji i bez internetu. 
 pod IP modułu albo pod `192.168.4.1` w trybie punktu dostępowego. Język (polski / angielski) i motyw (ciemny / jasny /
 niebieski) wybierasz w nagłówku strony.
 
+Przydatne drobiazgi: panel otwiera się na ostatnio używanej zakładce. Na każdej zakładce oprócz Status wąski pasek pod nagłówkiem
+pokazuje „Gotowy do jazdy” (albo pierwsze rzeczy, które nie są gotowe); dotknięcie otwiera Status. Przycisk **A+** w nagłówku
+włącza tryb terenowy (większe przyciski, pola i zakładki do używania w kabinie); jest zapamiętywany w przeglądarce. W Ustawieniach
+kategorie (Sieć, Połączenie z AgOpenWeb, ...) zwijają się po dotknięciu tytułu - otwarta jest tylko pierwsza - a pole wyszukiwania
+na górze filtruje ustawienia po nazwie lub opisie.
+
 ## Status
 
 ![Zakładka Status](../img/panel-status-pl.png)

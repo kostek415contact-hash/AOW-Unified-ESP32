@@ -8,6 +8,12 @@ The panel is a web page served by the module itself - no app and no internet nee
 `http://AOG-ESP32.local`, at the module's IP, or at `192.168.4.1` in access-point mode. The language (Polish / English)
 and the theme (dark / light / blue) are picked in the page header.
 
+Handy details: the panel reopens on the tab you used last. On every tab except Status a slim bar under the header shows
+"Ready to drive" (or the first things that are not ready); tap it to open Status. The **A+** button in the header switches
+field mode (larger buttons, inputs and tabs for use in a tractor cab); it is remembered in the browser. In Settings the
+categories (Network, AgOpenWeb connection, ...) fold by tapping their title - only the first starts open - and the search box
+at the top filters the settings by name or description.
+
 ## Status
 
 ![Status tab](../img/panel-status-en.png)

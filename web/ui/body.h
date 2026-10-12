@@ -19,9 +19,11 @@ R"HTML(</head>
   <div class="brand"><span class="dot" id="mainDot"></span><h1>AOG ESP32</h1><span class="chip" id="netChip">—</span></div>
   <div class="top-actions">
     <button id="authBtn" class="auth-btn" type="button" hidden></button>
+    <button id="fieldBtn" class="auth-btn fbtn" type="button" aria-pressed="false">A+</button>
     <select id="langSelect" aria-label="Language" data-i18n-attr="aria-label:language"></select>
     <select id="themeSelect" aria-label="Theme" data-i18n-attr="aria-label:theme"><option value="dark" data-i18n="dark">Dark</option><option value="light" data-i18n="light">Light</option><option value="blue" data-i18n="blue">Blue</option></select>
   </div>
+  <button type="button" class="rstrip" id="rstrip" hidden><span class="rv"></span><span class="rs"></span></button>
 </header>
 <div class="banner bad" id="offline" hidden data-i18n="no_connection_to_the_module_retrying">No connection to the module — retrying…</div>
 

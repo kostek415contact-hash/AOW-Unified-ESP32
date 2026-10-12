@@ -11,7 +11,8 @@ R"HTML(<!DOCTYPE html>
 <title>AOG ESP32</title>
 <script>
 (function(){var t='dark';try{t=localStorage.getItem('theme')||'dark';}catch(e){}t=({ciemny:'dark',jasny:'light',niebieski:'blue'})[t]||t;   /* saved by an older version */
-document.documentElement.setAttribute('data-theme',t);})();
+document.documentElement.setAttribute('data-theme',t);
+try{if(localStorage.getItem('aog.field')==='1')document.documentElement.classList.add('fm');}catch(e){}})();
 </script>
 <script>
 /* panel language: the remembered choice, and without it the browser language (Polish, otherwise English). Translation catalogs (the selected one + English as a fallback, plus the log templates) are added synchronously from the module */

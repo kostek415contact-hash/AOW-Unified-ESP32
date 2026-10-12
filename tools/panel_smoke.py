@@ -189,6 +189,57 @@ def main():
                 over = pp.evaluate('document.documentElement.scrollWidth-document.documentElement.clientWidth')
                 if over > 0:
                     errs.append('phone settings: horizontal overflow %d px' % over)
+                # search in Settings: filters, opens matches, and clearing restores the folded state
+                pp.fill('#setGrid .setbar input[type=search]', 'ntrip')
+                pp.wait_for_timeout(300)
+                vis = pp.eval_on_selector_all('#setGrid .setsec > .card:not([hidden])', 'e => e.length')
+                allc = pp.eval_on_selector_all('#setGrid .setsec > .card', 'e => e.length')
+                if vis < 1 or vis >= allc:
+                    errs.append('settings search: %d of %d cards visible for "ntrip"' % (vis, allc))
+                pp.fill('#setGrid .setbar input[type=search]', 'zzzzqqq')
+                pp.wait_for_timeout(200)
+                if pp.eval_on_selector('#setGrid .nomatch', 'e => e.hidden'):
+                    errs.append('settings search: no "nothing found" message')
+                pp.fill('#setGrid .setbar input[type=search]', '')
+                pp.wait_for_timeout(200)
+                if pp.eval_on_selector_all('#setGrid .secbox.shut', 'e => e.length') != nsec - 2:
+                    errs.append('settings search: clearing did not restore the folded sections')
+                pp.click('#setGrid .setbar button:nth-of-type(1)')
+                if pp.eval_on_selector_all('#setGrid .secbox.shut', 'e => e.length') != nsec:
+                    errs.append('settings: collapse all did not fold every section')
+                # remembered tab + ready-to-drive strip (hidden on Status, shown elsewhere)
+                pp.reload()
+                pp.wait_for_timeout(1200)
+                if pp.evaluate("document.querySelector('nav.tabs button.on, nav.tabs button.active, nav.tabs button[aria-selected=true]')&&document.querySelector('nav.tabs button.on, nav.tabs button.active, nav.tabs button[aria-selected=true]').dataset.tab") != 'settings':
+                    errs.append('remembered tab: Settings was not reopened after a reload')
+                if pp.eval_on_selector('#setGrid .secbox:first-of-type', 'e => e.classList.contains("shut")') is not True:
+                    errs.append('settings: folded state not remembered after a reload')
+                if pp.eval_on_selector('#rstrip', 'e => e.hidden'):
+                    errs.append('ready strip: not shown outside the Status tab')
+                pp.click('nav.tabs button[data-tab="status"]')
+                pp.wait_for_timeout(300)
+                if not pp.eval_on_selector('#rstrip', 'e => e.hidden'):
+                    errs.append('ready strip: still visible on the Status tab')
+                # field mode
+                pp.click('#fieldBtn')
+                if not pp.evaluate("document.documentElement.classList.contains('fm')"):
+                    errs.append('field mode: class not set')
+                pp.reload()
+                pp.wait_for_timeout(800)
+                if not pp.evaluate("document.documentElement.classList.contains('fm')"):
+                    errs.append('field mode: not remembered after a reload')
+                over = pp.evaluate('document.documentElement.scrollWidth-document.documentElement.clientWidth')
+                if over > 0:
+                    errs.append('phone field mode: horizontal overflow %d px' % over)
+                # chart groups fold
+                pp.click('nav.tabs button[data-tab="charts"]')
+                pp.wait_for_timeout(400)
+                if pp.eval_on_selector_all('#chGrid h2.fh2', 'e => e.length') < 1:
+                    errs.append('charts: no foldable groups')
+                else:
+                    pp.click('#chGrid h2.fh2')
+                    if not pp.eval_on_selector('#chGrid h2.fh2 + .grid', 'e => e.hidden'):
+                        errs.append('charts: group did not fold')
                 pctx.close()
             if scen == 'full' and lang == 'en':   # cards fold by their title, "collapse all" / "expand all", and the choice survives a reload
                 for tab, grid in (('readings', 'readGrid'), ('diag', 'diagGrid'), ('calibration', 'calGrid')):

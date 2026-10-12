@@ -181,6 +181,21 @@ function updStatus(s){
 function updHeader(s){
   const c=netCls(s);$('#mainDot').className='dot '+c;
   $('#netChip').textContent=s.apMode?'AP':s.netConnected?(s.netType==='WiFi'?'WiFi '+s.rssi+' dBm':s.netType):TL('no_network');
+  updStrip(s);
+}
+/* A slim "ready to drive" bar under the title on every tab except Status (which has the full card): verdict + the first problems; tap = Status. */
+function fixHeaderH(){const h=document.querySelector('header.top');if(h)document.documentElement.style.setProperty('--hh',h.offsetHeight+'px');}
+function updStrip(s){
+  const b=$('#rstrip');if(!b)return;
+  const was=b.hidden;
+  if(curTab==='status'){b.hidden=true;}
+  else{
+    const r=readiness(s),bad=r.k.filter(x=>x.c==='bad'||x.c==='warn');
+    b.hidden=false;b.style.setProperty('--c',TC[r.v]);
+    b.children[0].textContent=r.v==='ok'?TL('ready_to_drive'):r.v==='warn'?TL('ready_with_warnings_n',{n:r.warns}):TL('not_ready_n',{n:r.bads});
+    b.children[1].textContent=bad.slice(0,3).map(x=>x.n+': '+x.t).join(' • ');
+  }
+  if(was!==b.hidden||!b.hidden)fixHeaderH();
 }
 
 /* --- calibration --- */

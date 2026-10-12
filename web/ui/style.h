@@ -28,6 +28,12 @@ button,input,select{font-family:inherit;font-size:14px;color:var(--text)}
 .dot.warn{background:var(--warn);box-shadow:0 0 8px 1px rgba(224,169,64,.5)}
 .dot.bad{background:var(--bad);box-shadow:0 0 8px 1px rgba(224,88,79,.5)}
 .chip{font-size:12px;color:var(--label);border:1px solid var(--border);border-radius:999px;padding:2px 9px;white-space:nowrap}
+.top{flex-wrap:wrap}
+.rstrip{flex:1 1 100%;display:flex;align-items:center;gap:8px;min-height:28px;padding:3px 10px;border:0;border-left:4px solid var(--c,var(--label));border-radius:6px;background:var(--panel);color:var(--text);font-size:12.5px;text-align:left;cursor:pointer;overflow:hidden}
+.rstrip .rv{font-weight:700;color:var(--c,var(--text));white-space:nowrap}
+.rstrip .rs{color:var(--label);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;min-width:0}
+.fbtn{min-width:36px;padding:7px 8px}
+.fbtn[aria-pressed="true"]{color:var(--accent);border-color:var(--accent)}
 .top-actions{display:flex;align-items:center;gap:8px}
 .brand .chip{overflow:hidden;text-overflow:ellipsis;min-width:0}
 @media(max-width:520px){.top{gap:6px}.top-actions{gap:6px}.top-actions select{padding:6px 3px;font-size:13px;max-width:84px}.auth-btn{padding:6px 7px;font-size:13px}}   /* phone: two selectors (language, theme) next to the brand */
@@ -45,7 +51,7 @@ nav.tabs button{flex:1;display:flex;flex-direction:column;align-items:center;gap
 nav.tabs button.active{color:var(--accent);border-top-color:var(--accent)}
 .ico{width:22px;height:22px;stroke:currentColor;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
 @media(min-width:800px){
-  nav.tabs{position:sticky;top:53px;bottom:auto;border-top:0;border-bottom:1px solid var(--border);padding:0 14px;justify-content:flex-start;gap:4px}
+  nav.tabs{position:sticky;top:var(--hh,53px);bottom:auto;border-top:0;border-bottom:1px solid var(--border);padding:0 14px;justify-content:flex-start;gap:4px}
   nav.tabs button{flex:none;flex-direction:row;gap:8px;padding:0 16px;min-height:44px;font-size:13.5px;border-top:0;border-bottom:2px solid transparent}
   nav.tabs button.active{border-bottom-color:var(--accent)}
   .banner{top:98px}
@@ -82,6 +88,31 @@ h2:first-child{margin-top:4px}
 .secbox.shut>.sech::after{content:"\25B8"}
 .secbox.shut>.secd,.secbox.shut>.setsec{display:none}
 .secbox+.secbox{margin-top:10px}
+.setbar{display:flex;gap:6px;flex-wrap:wrap;align-items:center;margin:0 0 8px}
+.setbar input[type=search]{flex:1 1 100%;min-width:0;min-height:38px;background:var(--panel2);border:1px solid var(--border);border-radius:999px;padding:4px 14px;font-size:15px;color:var(--text)}
+.setbar input[type=search]:focus{outline:none;border-color:var(--accent)}
+.nomatch{color:var(--label);padding:14px 4px}
+h2.fh2{cursor:pointer;display:flex;justify-content:space-between;align-items:center;gap:8px;-webkit-user-select:none;user-select:none}
+h2.fh2::after{content:"\25BE";font-size:14px;color:var(--accent)}
+h2.fh2.shut::after{content:"\25B8"}
+@media(max-width:520px){.logbar{flex-wrap:nowrap;overflow-x:auto;scrollbar-width:none;-webkit-overflow-scrolling:touch}.logbar::-webkit-scrollbar{display:none}.logbar>*{flex:none}.logbar input{flex:none;width:150px}}
+/* Field mode (header button "A+"): larger text and touch targets for use in gloves / on a bouncing tractor seat */
+html.fm body{font-size:17px}
+html.fm .btn{min-height:60px;font-size:17px}
+html.fm .pill{min-height:50px;font-size:16px;padding:0 16px}
+html.fm select,html.fm .auth-btn{min-height:46px;font-size:15px}
+html.fm input[type=text],html.fm input[type=number],html.fm input[type=password],html.fm input[type=search]{min-height:56px;font-size:19px}
+html.fm .row{padding:10px 0;font-size:16.5px}
+html.fm .card h3{font-size:14.5px}
+html.fm .card-h h3{font-size:16px}
+html.fm .field>span{font-size:14.5px}
+html.fm .tile .tn{font-size:13.5px}
+html.fm .tile .ts{font-size:24px}
+html.fm .tile .tsub{font-size:14px}
+html.fm nav.tabs button{min-height:68px;font-size:12.5px}
+html.fm .sw{transform:scale(1.3);transform-origin:right center}
+html.fm .secbox>.sech,html.fm h2.fh2{font-size:20px;padding:10px 0}
+html.fm .rstrip{min-height:36px;font-size:15px}
 .foldbar{display:flex;gap:6px;justify-content:flex-end;margin:0 0 8px}
 .card h3.fh{cursor:pointer;display:flex;justify-content:space-between;align-items:center;gap:8px;-webkit-user-select:none;user-select:none}
 .card h3.fh::after{content:"\25BE";font-size:13px;color:var(--accent);flex:none}

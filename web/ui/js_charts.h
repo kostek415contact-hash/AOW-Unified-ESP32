@@ -495,8 +495,12 @@ function buildCharts(){
   CH_GROUPS.forEach(([title,keys])=>{
     const defs=keys?keys.map(k=>CHARTS.find(d=>d.series[0].k===k)).filter(Boolean):CHARTS.filter(d=>!listed.has(d.series[0].k));
     if(!defs.length)return;
-    const h2=document.createElement('h2');h2.textContent=title;root.appendChild(h2);
+    const h2=document.createElement('h2');h2.textContent=title;h2.className='fh2';h2.tabIndex=0;h2.setAttribute('role','button');root.appendChild(h2);
     const g=document.createElement('div');g.className='grid charts';root.appendChild(g);
+    const sk='chg:'+title,fold=(shut,save)=>{g.hidden=shut;h2.classList.toggle('shut',shut);h2.setAttribute('aria-expanded',shut?'false':'true');
+      if(save){const o=shutLoad();if(shut)o[sk]=1;else delete o[sk];shutSave(o);}if(!shut&&save)drawAll();};
+    h2.onclick=()=>fold(!g.hidden,true);h2.onkeydown=e=>{if(e.key==='Enter'||e.key===' '){e.preventDefault();h2.onclick();}};
+    fold(!!shutLoad()[sk],false);
     defs.forEach(def=>buildChart(def,g));
   });
   document.addEventListener('keydown',e=>{if(e.key==='Escape'){const b=CH.find(x=>x.el.classList.contains('big'));if(b)b.xb.click();}});

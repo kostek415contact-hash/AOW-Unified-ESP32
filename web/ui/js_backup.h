@@ -168,24 +168,58 @@ function updSenders(s){
 }
 /* Settings page: titled sections (jump chips on top), cards in a plain grid in the order you read them, long explanations folded under "Details". */
 const SETSEC=[];
-// A settings section is a box with a title (tap = fold / unfold), a short description and a grid of cards. On a phone (narrow
-// screen) only the first one starts open - the page would otherwise be several screens long; on a computer all start open.
-const NARROW=window.matchMedia&&window.matchMedia('(max-width:700px)').matches;
-function setSecToggle(box,open){
+// A settings section is a box with a title (tap = fold / unfold), a short description and a grid of cards. Only the first one starts
+// open; the choice is remembered in this browser (aog.shut, key set:<id>: 1 = shut, 0 = open).
+function setSecToggle(box,open,save){
   box.classList.toggle('shut',!open);
   const h=box.firstChild;h.setAttribute('aria-expanded',open?'true':'false');
+  if(save&&box.dataset.sid){const o=shutLoad();o['set:'+box.dataset.sid]=open?0:1;shutSave(o);}
 }
 function setSection(root,id,title,desc){
-  const box=el('section','secbox'),h=el('h2','sech',title);h.id='sec-'+id;
+  const box=el('section','secbox'),h=el('h2','sech',title);h.id='sec-'+id;box.dataset.sid=id;
   h.tabIndex=0;h.setAttribute('role','button');
-  h.onclick=()=>setSecToggle(box,box.classList.contains('shut'));
+  h.onclick=()=>setSecToggle(box,box.classList.contains('shut'),true);
   h.onkeydown=e=>{if(e.key==='Enter'||e.key===' '){e.preventDefault();h.onclick();}};
   box.appendChild(h);
   if(desc)box.appendChild(el('p','secd',desc));
   const grid=el('div','setsec');box.appendChild(grid);root.appendChild(box);
-  setSecToggle(box,!(NARROW&&SETSEC.length>0));
+  const v=shutLoad()['set:'+id];
+  setSecToggle(box,v===undefined?SETSEC.length===0:v===0,false);
   SETSEC.push([id,title]);
   return grid;
+}
+/* Search bar above the sections: filters the cards by their text (titles, labels, hints, placeholders); matching sections open,
+   the rest hide. Clearing it restores the folded / open state from before the search. Two buttons fold / unfold all sections. */
+function setSearchBar(root,nav){
+  const bar=el('div','setbar'),inp=document.createElement('input');
+  inp.type='search';inp.placeholder=TL('search_settings');inp.setAttribute('aria-label',TL('search_settings'));inp.autocomplete='off';
+  const none=el('div','nomatch',TL('no_settings_found'));none.hidden=true;
+  const boxes=()=>[...root.querySelectorAll('.secbox')];
+  let before=null;
+  const textOf=c=>(c.textContent+' '+[...c.querySelectorAll('input,select,textarea')].map(i=>(i.placeholder||'')+' '+(i.getAttribute('aria-label')||'')).join(' ')).toLowerCase();
+  const run=()=>{
+    const q=inp.value.trim().toLowerCase();
+    if(!q){
+      if(before){boxes().forEach((b,i)=>{b.hidden=false;setSecToggle(b,!before[i],false);});before=null;}
+      root.querySelectorAll('.setsec > .card').forEach(c=>{c.hidden=false;});
+      nav.hidden=false;none.hidden=true;return;
+    }
+    if(!before)before=boxes().map(b=>b.classList.contains('shut'));
+    nav.hidden=true;let any=false;
+    boxes().forEach(b=>{
+      let hit=0;
+      b.querySelectorAll('.setsec > .card').forEach(c=>{const m=textOf(c).indexOf(q)>=0;c.hidden=!m;if(m)hit++;});
+      b.hidden=!hit;if(hit){any=true;setSecToggle(b,true,false);}
+    });
+    none.hidden=any;
+  };
+  inp.oninput=run;
+  inp.onkeydown=e=>{if(e.key==='Escape'){inp.value='';run();}};
+  const mk=(txt,open)=>{const b=el('button','pill',txt);b.type='button';
+    b.onclick=()=>{if(inp.value){inp.value='';run();}boxes().forEach(x=>setSecToggle(x,open,true));};return b;};
+  bar.append(inp,mk(TL('collapse_all'),false),mk(TL('expand_all'),true));
+  root.insertBefore(bar,nav);root.appendChild(none);
+  return run;
 }
 /* Long explanations fold under "Details" (a tap opens them). Status messages and warnings (bad / warn classes, hidden ones) stay visible. */
 function foldLong(root){
@@ -309,8 +343,9 @@ function buildSet(){
   btns(c,[[TL('restart'),'',restart],[TL('ota_update'),'',()=>{location.href='/update';}],[TL('restore_everything_to_defaults'),'danger',factoryReset]]);
   gM.appendChild(c);
   // jump chips on top + folding of the long explanations
-  SETSEC.forEach(([id,t])=>{const b=el('button','pill',t);b.onclick=()=>{const h=document.getElementById('sec-'+id);if(!h)return;setSecToggle(h.parentNode,true);h.scrollIntoView({behavior:'smooth',block:'start'});};nav.appendChild(b);});
+  SETSEC.forEach(([id,t])=>{const b=el('button','pill',t);b.onclick=()=>{const h=document.getElementById('sec-'+id);if(!h)return;setSecToggle(h.parentNode,true,true);h.scrollIntoView({behavior:'smooth',block:'start'});};nav.appendChild(b);});
   foldLong(root);
+  setSearchBar(root,nav);
 }
 let settingsFilled=false;
 function fillSettings(s,force){
