@@ -1,0 +1,48 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 980 470" font-family="Helvetica,Arial,sans-serif">
+<rect width="100%" height="100%" fill="#fff"/>
+<text x="490" y="28" text-anchor="middle" font-size="17" font-weight="bold" fill="#222">AOW-Unified-ESP32 - signal connections (ESP32-S3)</text>
+<rect x="380" y="60" width="220" height="360" rx="12" fill="#dfeaff" stroke="#235" stroke-width="2.5"/>
+<text x="490" y="94" text-anchor="middle" font-size="18" font-weight="bold" fill="#123">ESP32-S3</text>
+<text x="490" y="114" text-anchor="middle" font-size="12" fill="#335">OPI PSRAM, USB / 5 V supply</text>
+<rect x="20" y="60" width="330" height="76" rx="8" fill="#f4f7fb" stroke="#445" stroke-width="1.5"/>
+<text x="30" y="82" font-size="14" font-weight="bold" fill="#111">GPS  LG290P</text>
+<text x="30" y="100" font-size="12" fill="#335">UART1 460800</text>
+<text x="30" y="118" font-size="12" fill="#222">RX GPIO4 · TX GPIO5</text>
+<line x1="350" y1="98" x2="380" y2="98" stroke="#235" stroke-width="2"/>
+<rect x="20" y="152" width="330" height="76" rx="8" fill="#f4f7fb" stroke="#445" stroke-width="1.5"/>
+<text x="30" y="174" font-size="14" font-weight="bold" fill="#111">IMU  BNO085 (UART-RVC)</text>
+<text x="30" y="192" font-size="12" fill="#335">UART2 115200</text>
+<text x="30" y="210" font-size="12" fill="#222">SDA wire → GPIO6 · RST → GPIO7 · PS0 → 3.3 V</text>
+<line x1="350" y1="190" x2="380" y2="190" stroke="#235" stroke-width="2"/>
+<rect x="20" y="244" width="330" height="76" rx="8" fill="#f4f7fb" stroke="#445" stroke-width="1.5"/>
+<text x="30" y="266" font-size="14" font-weight="bold" fill="#111">ADS1115  0x48</text>
+<text x="30" y="284" font-size="12" fill="#335">I²C</text>
+<text x="30" y="302" font-size="12" fill="#222">SDA GPIO8 · SCL GPIO9 · A0 angle · A1 current</text>
+<line x1="350" y1="282" x2="380" y2="282" stroke="#235" stroke-width="2"/>
+<rect x="20" y="336" width="330" height="76" rx="8" fill="#f4f7fb" stroke="#445" stroke-width="1.5"/>
+<text x="30" y="358" font-size="14" font-weight="bold" fill="#111">MCP23017  0x20</text>
+<text x="30" y="376" font-size="12" fill="#335">I²C (same bus)</text>
+<text x="30" y="394" font-size="12" fill="#222">sections pin 0-14 · hydLift pin 15</text>
+<line x1="350" y1="374" x2="380" y2="374" stroke="#235" stroke-width="2"/>
+<rect x="630" y="60" width="330" height="76" rx="8" fill="#f4f7fb" stroke="#445" stroke-width="1.5"/>
+<text x="640" y="82" font-size="14" font-weight="bold" fill="#111">Cytron MD13S</text>
+<text x="640" y="100" font-size="12" fill="#335">PWM + DIR</text>
+<text x="640" y="118" font-size="12" fill="#222">PWM GPIO16 · DIR GPIO17</text>
+<line x1="600" y1="98" x2="630" y2="98" stroke="#235" stroke-width="2"/>
+<rect x="630" y="152" width="330" height="76" rx="8" fill="#f4f7fb" stroke="#445" stroke-width="1.5"/>
+<text x="640" y="174" font-size="14" font-weight="bold" fill="#111">W5500 Ethernet (optional)</text>
+<text x="640" y="192" font-size="12" fill="#335">SPI</text>
+<text x="640" y="210" font-size="12" fill="#222">CS 10 · MOSI 11 · SCK 12 · MISO 13 · RST n/c</text>
+<line x1="600" y1="190" x2="630" y2="190" stroke="#235" stroke-width="2"/>
+<rect x="630" y="244" width="330" height="76" rx="8" fill="#f4f7fb" stroke="#445" stroke-width="1.5"/>
+<text x="640" y="266" font-size="14" font-weight="bold" fill="#111">Steering button / work switch</text>
+<text x="640" y="284" font-size="12" fill="#335">inputs</text>
+<text x="640" y="302" font-size="12" fill="#222">GPIO15 / GPIO18 (to GND)</text>
+<line x1="600" y1="282" x2="630" y2="282" stroke="#235" stroke-width="2"/>
+<rect x="630" y="336" width="330" height="76" rx="8" fill="#f4f7fb" stroke="#445" stroke-width="1.5"/>
+<text x="640" y="358" font-size="14" font-weight="bold" fill="#111">Status LED WS2812</text>
+<text x="640" y="376" font-size="12" fill="#335">1 wire</text>
+<text x="640" y="394" font-size="12" fill="#222">GPIO38</text>
+<line x1="600" y1="374" x2="630" y2="374" stroke="#235" stroke-width="2"/>
+<text x="490" y="452" text-anchor="middle" font-size="12" fill="#a00">Motor power (supply, fuse, hardware emergency stop) goes ONLY to the MD13S power terminals - never through the ESP32.</text>
+</svg>

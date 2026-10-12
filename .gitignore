@@ -1,0 +1,11 @@
+# Artefakty kompilacji Arduino IDE - generowane od nowa przy kazdym build
+build/
+*.bin
+*.elf
+*.map
+
+# Hasla i klucze - patrz secrets.example.h
+secrets.h
+
+# Generowany przez GitHub Actions przy wydaniu (numer poprawki w wersji)
+build_info.h

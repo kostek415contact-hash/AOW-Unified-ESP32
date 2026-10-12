@@ -1,0 +1,29 @@
+name: tests
+
+# Host tests for branches other than main and for nothing else: on main and on pull requests the same tests already run
+# as the first job of build-and-release (.github/workflows/release.yml), so running them here too would only double the work.
+on:
+  push:
+    branches-ignore: [main]
+
+jobs:
+  host-tests:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+      - name: Browser for the panel smoke test
+        run: |
+          pip install playwright==1.49.0
+          playwright install --with-deps chromium
+      - name: Host tests, panel script syntax, translations, panel in a browser
+        run: bash tools/run_tests.sh
+        env:
+          PANEL_SMOKE_REQUIRE: '1'
+      - name: Host tests again with AddressSanitizer + UndefinedBehaviorSanitizer
+        run: SANITIZE=1 bash tools/run_tests.sh
+        env:
+          PANEL_SMOKE_REQUIRE: '1'

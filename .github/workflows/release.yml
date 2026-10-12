@@ -1,0 +1,140 @@
+name: build-and-release
+
+# Builds the firmware with arduino-cli.
+#  - every push / pull request: host tests + compile check
+#  - push to main that changes firmware sources, or a manual run with "release" ticked:
+#    also publishes a GitHub Release vMAJOR.MINOR.N (N = last existing patch + 1) with the .bin files attached.
+#    MAJOR.MINOR is set by hand in config/config.h (FIRMWARE_MAJOR_MINOR); N is added here.
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+    inputs:
+      release:
+        description: 'Publish a Release even if no firmware source changed'
+        type: boolean
+        default: false
+
+concurrency:
+  group: build-release-${{ github.ref }}
+  cancel-in-progress: false
+
+env:
+  # Keep these in sync with the Arduino IDE settings used for the real device (Tools menu).
+  # The versions below are the ones the author's device was developed and tested with (Arduino IDE 2 build log). A binary built with
+  # other versions of the core or the libraries once froze on the device (AgOpenWeb connected), while the IDE build worked.
+  # Change them only together with the README/docs and after a test on the device.
+  ESP32_CORE: "3.3.11"
+  # = Arduino IDE: ESP32S3 Dev Module, USB CDC On Boot Enabled, 16 MB flash, partitions "16M Flash (3MB APP/9.9MB FATFS)", OPI PSRAM;
+  #   every other Tools option at its default (240 MHz, QIO 80 MHz, Hardware CDC and JTAG, loop/events on core 1, debug level none).
+  FQBN: "esp32:esp32:esp32s3:CDCOnBoot=cdc,FlashSize=16M,PartitionScheme=app3M_fat9M_16MB,PSRAM=opi"
+
+jobs:
+  host-tests:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+      - name: Browser for the panel smoke test
+        run: |
+          pip install playwright==1.49.0
+          playwright install --with-deps chromium
+      - run: bash tools/run_tests.sh
+        env:
+          PANEL_SMOKE_REQUIRE: '1'
+      - name: Host tests again with AddressSanitizer + UndefinedBehaviorSanitizer
+        run: SANITIZE=1 bash tools/run_tests.sh
+        env:
+          PANEL_SMOKE_REQUIRE: '1'
+
+  build:
+    needs: host-tests
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write          # needed to create the tag and the Release
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0       # full history + tags: needed for patch numbering and change detection
+
+      - name: Decide version and whether to release
+        id: ver
+        env:
+          BEFORE: ${{ github.event.before }}
+          RELEASE_INPUT: ${{ github.event.inputs.release }}
+        run: |
+          mm=$(grep -oP '#define FIRMWARE_MAJOR_MINOR "\K[^"]+' config/config.h)
+          [ -n "$mm" ] || { echo "::error::FIRMWARE_MAJOR_MINOR not found in config/config.h"; exit 1; }
+          last=$(git tag -l "v${mm}.*" | sed -E "s/^v${mm//./\\.}\\.//" | grep -E '^[0-9]+$' | sort -n | tail -1)
+          if [ -z "$last" ]; then patch=0; else patch=$((last + 1)); fi
+
+          release=false
+          if [ "$GITHUB_EVENT_NAME" = "workflow_dispatch" ] && [ "$RELEASE_INPUT" = "true" ]; then
+            release=true
+          elif [ "$GITHUB_EVENT_NAME" = "push" ] && [ "$GITHUB_REF" = "refs/heads/main" ]; then
+            if [ -z "$BEFORE" ] || [[ "$BEFORE" =~ ^0+$ ]] || ! git cat-file -e "$BEFORE" 2>/dev/null; then
+              changed=1
+            else
+              changed=$(git diff --name-only "$BEFORE" "$GITHUB_SHA" \
+                | grep -vE '(\.md$|^LICENSE$|^tests/|^tools/|^\.github/|^\.gitignore$|^docs/)' | wc -l)
+            fi
+            [ "$changed" -gt 0 ] && release=true
+          fi
+          echo "version=${mm}.${patch}" >> "$GITHUB_OUTPUT"
+          echo "patch=${patch}"         >> "$GITHUB_OUTPUT"
+          echo "release=${release}"     >> "$GITHUB_OUTPUT"
+          echo "version ${mm}.${patch}, release=${release}"
+
+      - uses: arduino/setup-arduino-cli@v2
+
+      - name: Install ESP32 core and libraries
+        run: |
+          arduino-cli config init
+          arduino-cli config set network.connection_timeout 600s
+          arduino-cli config add board_manager.additional_urls https://espressif.github.io/arduino-esp32/package_esp32_index.json
+          arduino-cli core update-index
+          arduino-cli core install "esp32:esp32@${ESP32_CORE}"
+          arduino-cli lib install "Adafruit ADS1X15@2.6.2" "Adafruit MCP23017 Arduino Library@2.3.2" "Adafruit NeoPixel@1.15.5" "Adafruit BNO08x RVC@1.0.2" "Adafruit BusIO@1.17.4"
+          arduino-cli core list
+          arduino-cli lib list
+
+      - name: Compile (the sketch folder must be named like the .ino)
+        run: |
+          echo "#define FIRMWARE_PATCH \"${{ steps.ver.outputs.patch }}\"" > build_info.h
+          echo "#define FIRMWARE_BUILD_STAMP \"$(date -u '+%Y-%m-%d %H:%M') UTC (${GITHUB_SHA::7})\"" >> build_info.h
+          cat build_info.h
+          mkdir -p /tmp/sketch && cp -r . /tmp/sketch/AOW-Unified-ESP32
+          arduino-cli compile --fqbn "$FQBN" --export-binaries /tmp/sketch/AOW-Unified-ESP32
+          ls -la /tmp/sketch/AOW-Unified-ESP32/build/*/
+
+      - name: Collect binaries
+        run: |
+          ver="${{ steps.ver.outputs.version }}"
+          out=/tmp/out; mkdir -p $out
+          b=$(ls -d /tmp/sketch/AOW-Unified-ESP32/build/*/ | head -1)
+          cp "$b/AOW-Unified-ESP32.ino.bin"        "$out/AOW-Unified-ESP32-$ver-ota.bin"
+          cp "$b/AOW-Unified-ESP32.ino.merged.bin" "$out/AOW-Unified-ESP32-$ver-full-flash.bin"
+          (cd $out && sha256sum *.bin > SHA256SUMS.txt && cat SHA256SUMS.txt)
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: firmware-${{ steps.ver.outputs.version }}
+          path: /tmp/out/*
+
+      - name: Publish Release
+        if: steps.ver.outputs.release == 'true'
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: v${{ steps.ver.outputs.version }}
+          target_commitish: ${{ github.sha }}
+          name: v${{ steps.ver.outputs.version }}
+          files: /tmp/out/*
+          generate_release_notes: true
+          body: |
+            **-ota.bin** - update through the panel (`/update`) or the Arduino IDE network port.
+            **-full-flash.bin** - complete image for a first flash over USB (e.g. `esptool.py write_flash 0x0 file.bin`).
+            Read SAFETY.md before connecting to a machine. See CHANGELOG.md for changes.
