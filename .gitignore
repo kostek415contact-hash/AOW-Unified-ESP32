@@ -9,3 +9,7 @@ secrets.h
 
 # Generowany przez GitHub Actions przy wydaniu (numer poprawki w wersji)
 build_info.h
+
+# Python bytecode (tools/*.py)
+__pycache__/
+*.pyc
