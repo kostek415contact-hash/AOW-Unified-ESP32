@@ -79,7 +79,7 @@ silnik w ułamku sekundy; zaznacz **Odwróć kierunek silnika**, zapisz i powtó
 
 Zakładka jest podzielona na sekcje z tytułami - Sieć, Połączenie z AgOpenWeb, Zabezpieczenie panelu i kopia, Poprawki RTK
 (NTRIP), Sprzęt i czasy, Dziennik diagnostyczny, Moduł - z przyciskami u góry do szybkiego przejścia. Długie opisy są
-schowane pod „Szczegóły”.
+schowane pod „Szczegóły”. Na telefonie każdą sekcję można zwinąć dotknięciem tytułu, a otwarta na początku jest tylko pierwsza.
 
 | Karta | Co robi |
 |---|---|

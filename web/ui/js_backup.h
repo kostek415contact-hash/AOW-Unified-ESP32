@@ -168,11 +168,22 @@ function updSenders(s){
 }
 /* Settings page: titled sections (jump chips on top), cards in a plain grid in the order you read them, long explanations folded under "Details". */
 const SETSEC=[];
+// A settings section is a box with a title (tap = fold / unfold), a short description and a grid of cards. On a phone (narrow
+// screen) only the first one starts open - the page would otherwise be several screens long; on a computer all start open.
+const NARROW=window.matchMedia&&window.matchMedia('(max-width:700px)').matches;
+function setSecToggle(box,open){
+  box.classList.toggle('shut',!open);
+  const h=box.firstChild;h.setAttribute('aria-expanded',open?'true':'false');
+}
 function setSection(root,id,title,desc){
-  const h=el('h2','sech',title);h.id='sec-'+id;
-  root.appendChild(h);
-  if(desc)root.appendChild(el('p','secd',desc));
-  const grid=el('div','setsec');root.appendChild(grid);
+  const box=el('section','secbox'),h=el('h2','sech',title);h.id='sec-'+id;
+  h.tabIndex=0;h.setAttribute('role','button');
+  h.onclick=()=>setSecToggle(box,box.classList.contains('shut'));
+  h.onkeydown=e=>{if(e.key==='Enter'||e.key===' '){e.preventDefault();h.onclick();}};
+  box.appendChild(h);
+  if(desc)box.appendChild(el('p','secd',desc));
+  const grid=el('div','setsec');box.appendChild(grid);root.appendChild(box);
+  setSecToggle(box,!(NARROW&&SETSEC.length>0));
   SETSEC.push([id,title]);
   return grid;
 }
@@ -272,7 +283,7 @@ function buildSet(){
   btns(c,[[TL('restart'),'',restart],[TL('ota_update'),'',()=>{location.href='/update';}],[TL('restore_everything_to_defaults'),'danger',factoryReset]]);
   gM.appendChild(c);
   // jump chips on top + folding of the long explanations
-  SETSEC.forEach(([id,t])=>{const b=el('button','pill',t);b.onclick=()=>{const h=document.getElementById('sec-'+id);if(h)h.scrollIntoView({behavior:'smooth',block:'start'});};nav.appendChild(b);});
+  SETSEC.forEach(([id,t])=>{const b=el('button','pill',t);b.onclick=()=>{const h=document.getElementById('sec-'+id);if(!h)return;setSecToggle(h.parentNode,true);h.scrollIntoView({behavior:'smooth',block:'start'});};nav.appendChild(b);});
   foldLong(root);
 }
 let settingsFilled=false;

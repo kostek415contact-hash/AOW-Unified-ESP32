@@ -170,6 +170,26 @@ def main():
                 nfold = page.eval_on_selector_all('#setGrid details.fold', 'e => e.length')
                 if nsec < 6 or nchips != nsec or nfold < 1:
                     errs.append('settings layout broken: %d sections, %d chips, %d folds' % (nsec, nchips, nfold))
+            if scen == 'full' and lang == 'en':   # Settings on a phone: only the first section starts open, a chip opens its section
+                pctx = browser.new_context(viewport={'width': 390, 'height': 844})
+                pctx.add_init_script("try{localStorage.setItem('lang','en')}catch(e){}")
+                pp = pctx.new_page()
+                pp.goto(base)
+                pp.wait_for_timeout(1200)
+                pp.click('nav.tabs button[data-tab="settings"]')
+                pp.wait_for_timeout(400)
+                nsec = pp.eval_on_selector_all('#setGrid .secbox', 'e => e.length')
+                nshut = pp.eval_on_selector_all('#setGrid .secbox.shut', 'e => e.length')
+                if nsec < 6 or nshut != nsec - 1:
+                    errs.append('phone settings: %d sections, %d folded (expected all but the first)' % (nsec, nshut))
+                pp.click('#setGrid .setnav button:last-child')
+                pp.wait_for_timeout(500)
+                if pp.eval_on_selector_all('#setGrid .secbox.shut', 'e => e.length') != nsec - 2:
+                    errs.append('phone settings: a jump chip did not open its section')
+                over = pp.evaluate('document.documentElement.scrollWidth-document.documentElement.clientWidth')
+                if over > 0:
+                    errs.append('phone settings: horizontal overflow %d px' % over)
+                pctx.close()
             if scen == 'full' and lang == 'en':   # Calibration: the step-by-step instructions are folded, not a wall of text
                 page.click('nav.tabs button[data-tab="calibration"]')
                 page.wait_for_timeout(400)

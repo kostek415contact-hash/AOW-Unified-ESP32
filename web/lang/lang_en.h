@@ -735,7 +735,7 @@ static const char WEB_LANG_EN[] PROGMEM = R"LANG(window.AOG_CAT=window.AOG_CAT||
   "lifetime_abnormal_n": "{n} abnormal",
   "lifetime_motor_time": "Motor running time (all time)",
   "lifetime_trips": "Protection trips (all time)",
-  "lifetime_trips_n": "runaway {a} • current {b} • loop hang {c}",
+  "lifetime_trips_n": "runaway {a} • current {b} • loop {c}",
   "sec_network": "Network",
   "sec_agopenweb": "AgOpenWeb connection",
   "sec_security": "Panel security and backup",

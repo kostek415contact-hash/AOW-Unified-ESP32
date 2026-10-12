@@ -78,7 +78,7 @@ stops the motor within a fraction of a second; tick **Reverse motor direction (D
 
 The tab is split into titled sections - Network, AgOpenWeb connection, Panel security and backup, RTK corrections (NTRIP),
 Hardware and timing, Diagnostic logging, Module - with buttons at the top to jump to one. Long explanations are folded under
-"Details".
+"Details". On a phone every section can be folded by tapping its title, and only the first one starts open.
 
 | Card | What it does |
 |---|---|

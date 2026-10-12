@@ -76,7 +76,12 @@ h2:first-child{margin-top:4px}
 .setpage{max-width:1180px;margin:0 auto}
 .setnav{display:flex;flex-wrap:wrap;gap:6px;margin:0 0 4px}
 .sech{margin:26px 0 4px;font-size:17px;font-weight:650;scroll-margin-top:70px;padding-bottom:6px;border-bottom:1px solid var(--border)}
-.setnav+.sech{margin-top:14px}
+.setnav+.secbox>.sech{margin-top:14px}
+.secbox>.sech{cursor:pointer;display:flex;justify-content:space-between;align-items:center;gap:8px;-webkit-user-select:none;user-select:none}
+.secbox>.sech::after{content:"\25BE";font-size:14px;color:var(--accent)}
+.secbox.shut>.sech::after{content:"\25B8"}
+.secbox.shut>.secd,.secbox.shut>.setsec{display:none}
+.secbox+.secbox{margin-top:10px}
 .secd{margin:6px 0 10px;font-size:13px;color:var(--label);line-height:1.5;max-width:70ch}
 .setsec{display:grid;grid-template-columns:repeat(auto-fill,minmax(min(100%,340px),1fr));gap:12px;align-items:start;margin-top:10px}
 .setsec .card{padding:14px 16px}

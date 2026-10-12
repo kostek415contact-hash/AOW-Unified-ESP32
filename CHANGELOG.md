@@ -4,6 +4,10 @@ Format based on [Keep a Changelog](https://keepachangelog.com/); versions are `m
 
 ## [Unreleased]
 
+### Changed
+- Panel, Settings on a phone: every section folds by tapping its title and only the first starts open (the page was about 6,400 px tall, now about 2,600 px); a jump button opens its section. On a computer all sections stay open. Checked by the browser smoke test at 390 px (also: no horizontal overflow).
+- Panel, System card: protection trips are shown shorter ("runaway 0 • current 0 • loop 0") so the row no longer wraps on a phone; the Polish text no longer has the English word "runaway".
+
 ## [1.0.0] - 2026-10-12
 
 First stable release: `FIRMWARE_MAJOR_MINOR` is now `1.0` (the first release of a fresh repository is `v1.0.0`; CI adds the patch number).
