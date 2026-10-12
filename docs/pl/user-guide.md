@@ -14,6 +14,44 @@ włącza tryb terenowy (większe przyciski, pola i zakładki do używania w kabi
 kategorie (Sieć, Połączenie z AgOpenWeb, ...) zwijają się po dotknięciu tytułu - otwarta jest tylko pierwsza - a pole wyszukiwania
 na górze filtruje ustawienia po nazwie lub opisie; pięć ostatnio edytowanych kart pojawia się nad nimi jako skróty („Ostatnio edytowane”). Na telefonie tryb terenowy sprawia, że pasek zakładek przewija się na boki. Zakładka Dziennik ma **Raport diagnostyczny** (pobranie) i **Kopiuj raport** (do schowka, bez haseł) do zgłaszania błędów.
 
+## Na komputerze, tablecie i telefonie
+
+Ten sam panel dopasowuje się do ekranu: na komputerze karty leżą obok siebie, na tablecie w dwóch kolumnach, a na telefonie zakładki przechodzą na dół ekranu. Zrzuty wszystkich głównych zakładek:
+
+<table>
+<tr><th>Komputer</th><th>Tablet</th><th>Telefon</th></tr>
+<tr><td colspan="3"><b>Status</b></td></tr>
+<tr>
+<td valign="top"><img src="../img/panel-status-pl.png" alt="Status" width="420"></td>
+<td valign="top"><img src="../img/panel-status-tablet-pl.png" alt="Status" width="300"></td>
+<td valign="top"><img src="../img/panel-status-phone-pl.png" alt="Status" width="150"></td>
+</tr>
+<tr><td colspan="3"><b>Odczyt</b></td></tr>
+<tr>
+<td valign="top"><img src="../img/panel-readings-pl.png" alt="Odczyt" width="420"></td>
+<td valign="top"><img src="../img/panel-readings-tablet-pl.png" alt="Odczyt" width="300"></td>
+<td valign="top"><img src="../img/panel-readings-phone-pl.png" alt="Odczyt" width="150"></td>
+</tr>
+<tr><td colspan="3"><b>Wykresy</b></td></tr>
+<tr>
+<td valign="top"><img src="../img/panel-charts-pl.png" alt="Wykresy" width="420"></td>
+<td valign="top"><img src="../img/panel-charts-tablet-pl.png" alt="Wykresy" width="300"></td>
+<td valign="top"><img src="../img/panel-charts-phone-pl.png" alt="Wykresy" width="150"></td>
+</tr>
+<tr><td colspan="3"><b>Kalibracja</b></td></tr>
+<tr>
+<td valign="top"><img src="../img/panel-calibration-pl.png" alt="Kalibracja" width="420"></td>
+<td valign="top"><img src="../img/panel-calibration-tablet-pl.png" alt="Kalibracja" width="300"></td>
+<td valign="top"><img src="../img/panel-calibration-phone-pl.png" alt="Kalibracja" width="150"></td>
+</tr>
+<tr><td colspan="3"><b>Ustawienia</b></td></tr>
+<tr>
+<td valign="top"><img src="../img/panel-settings-pl.png" alt="Ustawienia" width="420"></td>
+<td valign="top"><img src="../img/panel-settings-tablet-pl.png" alt="Ustawienia" width="300"></td>
+<td valign="top"><img src="../img/panel-settings-phone-pl.png" alt="Ustawienia" width="150"></td>
+</tr>
+</table>
+
 ## Status
 
 ![Zakładka Status](../img/panel-status-pl.png)

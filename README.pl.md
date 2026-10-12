@@ -15,6 +15,8 @@ na żywo, własnym klientem NTRIP, IMU i aktualizacją przez WiFi. Bez aplikacji
 po polsku i angielsku.
 
 ![Zakładka Status panelu WWW](docs/img/panel-status-pl.png)
+
+<p><img src="docs/img/panel-status-tablet-pl.png" alt="Zakładka Status na tablecie" width="330"> <img src="docs/img/panel-status-phone-pl.png" alt="Zakładka Status na telefonie" width="160"></p>
 <sub>Zakładka Status. Wszystkie zrzuty ekranu i schemat połączeń w tym repozytorium zostały **wygenerowane przez AI** z danych demo, nie z prawdziwej maszyny.</sub>
 
 ## Najważniejsze

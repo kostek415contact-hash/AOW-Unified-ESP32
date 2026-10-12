@@ -14,6 +14,44 @@ field mode (larger buttons, inputs and tabs for use in a tractor cab); it is rem
 categories (Network, AgOpenWeb connection, ...) fold by tapping their title - only the first starts open - and the search box
 at the top filters the settings by name or description; the last five cards you edited appear above them as shortcuts ("Recently edited"). On a phone, field mode makes the tab bar scroll sideways. The Log tab has **Diagnostic report** (download) and **Copy report** (to the clipboard, secrets hidden) for bug reports.
 
+## On a computer, tablet and phone
+
+The same panel adapts to the screen: on a computer the cards sit side by side, on a tablet in two columns, and on a phone the tabs move to the bottom of the screen. Pictures of every main tab:
+
+<table>
+<tr><th>Computer</th><th>Tablet</th><th>Phone</th></tr>
+<tr><td colspan="3"><b>Status</b></td></tr>
+<tr>
+<td valign="top"><img src="../img/panel-status-en.png" alt="Status" width="420"></td>
+<td valign="top"><img src="../img/panel-status-tablet-en.png" alt="Status" width="300"></td>
+<td valign="top"><img src="../img/panel-status-phone-en.png" alt="Status" width="150"></td>
+</tr>
+<tr><td colspan="3"><b>Readings</b></td></tr>
+<tr>
+<td valign="top"><img src="../img/panel-readings-en.png" alt="Readings" width="420"></td>
+<td valign="top"><img src="../img/panel-readings-tablet-en.png" alt="Readings" width="300"></td>
+<td valign="top"><img src="../img/panel-readings-phone-en.png" alt="Readings" width="150"></td>
+</tr>
+<tr><td colspan="3"><b>Charts</b></td></tr>
+<tr>
+<td valign="top"><img src="../img/panel-charts-en.png" alt="Charts" width="420"></td>
+<td valign="top"><img src="../img/panel-charts-tablet-en.png" alt="Charts" width="300"></td>
+<td valign="top"><img src="../img/panel-charts-phone-en.png" alt="Charts" width="150"></td>
+</tr>
+<tr><td colspan="3"><b>Calibration</b></td></tr>
+<tr>
+<td valign="top"><img src="../img/panel-calibration-en.png" alt="Calibration" width="420"></td>
+<td valign="top"><img src="../img/panel-calibration-tablet-en.png" alt="Calibration" width="300"></td>
+<td valign="top"><img src="../img/panel-calibration-phone-en.png" alt="Calibration" width="150"></td>
+</tr>
+<tr><td colspan="3"><b>Settings</b></td></tr>
+<tr>
+<td valign="top"><img src="../img/panel-settings-en.png" alt="Settings" width="420"></td>
+<td valign="top"><img src="../img/panel-settings-tablet-en.png" alt="Settings" width="300"></td>
+<td valign="top"><img src="../img/panel-settings-phone-en.png" alt="Settings" width="150"></td>
+</tr>
+</table>
+
 ## Status
 
 ![Status tab](../img/panel-status-en.png)

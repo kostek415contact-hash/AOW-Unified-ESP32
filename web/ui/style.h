@@ -51,13 +51,15 @@ nav.tabs button{flex:1;display:flex;flex-direction:column;align-items:center;gap
 nav.tabs button.active{color:var(--accent);border-top-color:var(--accent)}
 .ico{width:22px;height:22px;stroke:currentColor;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
 @media(min-width:800px){
-  nav.tabs{position:sticky;top:var(--hh,53px);bottom:auto;border-top:0;border-bottom:1px solid var(--border);padding:0 14px;justify-content:flex-start;gap:4px}
-  nav.tabs button{flex:none;flex-direction:row;gap:8px;padding:0 16px;min-height:44px;font-size:13.5px;border-top:0;border-bottom:2px solid transparent}
+  nav.tabs{position:sticky;top:var(--hh,53px);bottom:auto;border-top:0;border-bottom:1px solid var(--border);padding:0 14px;justify-content:flex-start;gap:4px;overflow-x:auto;scrollbar-width:none}
+  nav.tabs::-webkit-scrollbar{display:none}
+  nav.tabs button{flex:none;flex-direction:row;gap:8px;padding:0 clamp(8px,1.6vw,16px);min-height:44px;font-size:13.5px;border-top:0;border-bottom:2px solid transparent}
   nav.tabs button.active{border-bottom-color:var(--accent)}
   .banner{top:98px}
   .grid.tiles{grid-template-columns:repeat(4,1fr)}
   main{padding-bottom:30px!important}
 }
+@media(min-width:800px) and (max-width:980px){nav.tabs button .ico{display:none}}   /* tablet portrait: seven tabs fit only without the icons */
 main{max-width:1180px;margin:0 auto;padding:14px 14px 84px}
 .tab{display:none}.tab.active{display:block}
 h2{font-size:12px;font-weight:600;letter-spacing:.06em;text-transform:uppercase;color:var(--label);margin:20px 2px 8px}
