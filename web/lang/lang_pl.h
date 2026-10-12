@@ -744,6 +744,8 @@ static const char WEB_LANG_PL[] PROGMEM = R"LANG(window.AOG_CAT=window.AOG_CAT||
   "sec_logging": "Dziennik diagnostyczny",
   "sec_module": "Moduł",
   "show_details": "Szczegóły",
+  "collapse_all": "Zwiń wszystko",
+  "expand_all": "Rozwiń wszystko",
   "lift_control": "Sterowanie",
   "log_copied": "Skopiowano dziennik",
   "copy_failed": "Nie udało się skopiować",

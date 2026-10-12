@@ -5,6 +5,7 @@ Format based on [Keep a Changelog](https://keepachangelog.com/); versions are `m
 ## [Unreleased]
 
 ### Changed
+- Panel: cards in Readings, Diagnostics and Calibration fold by tapping their title (chevron on the right; Diagnostics cards keep the on/off switch), with "Collapse all" / "Expand all" buttons above them; the choice is remembered in the browser. Long notes and hints in Diagnostics, Calibration and Settings fold under "Details" (warnings and status messages stay visible). Checked by the browser smoke test (fold, reload, collapse / expand all).
 - Panel, Settings on a phone: every section folds by tapping its title and only the first starts open (the page was about 6,400 px tall, now about 2,600 px); a jump button opens its section. On a computer all sections stay open. Checked by the browser smoke test at 390 px (also: no horizontal overflow).
 - Panel, System card: protection trips are shown shorter ("runaway 0 • current 0 • loop 0") so the row no longer wraps on a phone; the Polish text no longer has the English word "runaway".
 

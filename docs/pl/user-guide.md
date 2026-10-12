@@ -25,6 +25,8 @@ od AgOpenWeb (zadany kąt, prędkość, sekcje), sieć i RTCM, obciążenie i pa
 nim steruje (AgOpenWeb czy ręcznie) oraz ma przyciski Podnieś / Opuść / Auto. Podnieś i Opuść proszą o potwierdzenie;
 Auto działa zawsze, a po restarcie zawsze wraca automat.
 
+W Odczycie, Diagnostyce i Kalibracji kartę zwijasz dotknięciem jej tytułu; **Zwiń wszystko** / **Rozwiń wszystko** nad kartami robią to dla całej zakładki, a przeglądarka pamięta wybór. Długie objaśnienia wszędzie są schowane pod **Szczegóły**.
+
 ## Wykresy
 
 ![Zakładka Wykresy](../img/panel-charts-pl.png)

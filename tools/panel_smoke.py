@@ -190,6 +190,28 @@ def main():
                 if over > 0:
                     errs.append('phone settings: horizontal overflow %d px' % over)
                 pctx.close()
+            if scen == 'full' and lang == 'en':   # cards fold by their title, "collapse all" / "expand all", and the choice survives a reload
+                for tab, grid in (('readings', 'readGrid'), ('diag', 'diagGrid'), ('calibration', 'calGrid')):
+                    page.click('nav.tabs button[data-tab="%s"]' % tab)
+                    page.wait_for_timeout(300)
+                    ncards = page.eval_on_selector_all('#%s .card' % grid, 'e => e.length')
+                    page.click('#tab-%s .foldbar button:nth-child(1)' % tab)
+                    page.wait_for_timeout(200)
+                    nshut = page.eval_on_selector_all('#%s .card.shut' % grid, 'e => e.length')
+                    if ncards < 3 or nshut != ncards:
+                        errs.append('%s: collapse all folded %d of %d cards' % (tab, nshut, ncards))
+                    page.click('#%s .card h3.fh' % grid)   # one card opens again
+                    if page.eval_on_selector_all('#%s .card.shut' % grid, 'e => e.length') != ncards - 1:
+                        errs.append('%s: tapping a card title did not unfold it' % tab)
+                    page.reload()
+                    page.wait_for_timeout(1200)
+                    page.click('nav.tabs button[data-tab="%s"]' % tab)
+                    page.wait_for_timeout(300)
+                    if page.eval_on_selector_all('#%s .card.shut' % grid, 'e => e.length') != ncards - 1:
+                        errs.append('%s: folded cards were not remembered after a reload' % tab)
+                    page.click('#tab-%s .foldbar button:nth-child(2)' % tab)
+                    if page.eval_on_selector_all('#%s .card.shut' % grid, 'e => e.length') != 0:
+                        errs.append('%s: expand all left cards folded' % tab)
             if scen == 'full' and lang == 'en':   # Calibration: the step-by-step instructions are folded, not a wall of text
                 page.click('nav.tabs button[data-tab="calibration"]')
                 page.wait_for_timeout(400)

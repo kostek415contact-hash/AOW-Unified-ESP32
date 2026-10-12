@@ -744,6 +744,8 @@ static const char WEB_LANG_EN[] PROGMEM = R"LANG(window.AOG_CAT=window.AOG_CAT||
   "sec_logging": "Diagnostic logging",
   "sec_module": "Module",
   "show_details": "Details",
+  "collapse_all": "Collapse all",
+  "expand_all": "Expand all",
   "lift_control": "Control",
   "log_copied": "Log copied",
   "copy_failed": "Copy failed",

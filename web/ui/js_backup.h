@@ -187,12 +187,38 @@ function setSection(root,id,title,desc){
   SETSEC.push([id,title]);
   return grid;
 }
+/* Long explanations fold under "Details" (a tap opens them). Status messages and warnings (bad / warn classes, hidden ones) stay visible. */
 function foldLong(root){
-  root.querySelectorAll('.note,.secd,ol.steps').forEach(p=>{
-    if(p.hidden||p.id==='restartHint'||p.closest('details')||p.textContent.length<140)return;
+  root.querySelectorAll('.note,.hint,.secd,ol.steps').forEach(p=>{
+    if(p.hidden||p.id==='restartHint'||p.id==='featHint'||p.closest('details')||p.textContent.length<100||/\b(bad|warn|ok|active)\b/.test(p.className))return;
     const d=el('details','fold'),sm=el('summary','',TL('show_details'));
     p.replaceWith(d);d.append(sm,p);
   });
+}
+/* Cards fold by tapping their title (the chevron on the right); the choice is remembered in this browser. Two small buttons above the
+   grid fold / unfold all of them. Diagnostics cards keep their on/off switch visible when folded. */
+const SHUT_KEY='aog.shut';
+function shutLoad(){try{return JSON.parse(localStorage.getItem(SHUT_KEY)||'{}')||{};}catch(e){return {};}}
+function shutSave(o){try{localStorage.setItem(SHUT_KEY,JSON.stringify(o));}catch(e){}}
+function cardFolding(grid){
+  const sid=grid.id,cards=()=>[...grid.querySelectorAll('.card')].filter(c=>c.querySelector('h3'));
+  const keyOf=c=>sid+':'+c.querySelector('h3').dataset.k;
+  const apply=(c,shut,save)=>{
+    c.classList.toggle('shut',shut);c.querySelector('h3').setAttribute('aria-expanded',shut?'false':'true');
+    if(save){const o=shutLoad();if(shut)o[keyOf(c)]=1;else delete o[keyOf(c)];shutSave(o);}
+  };
+  const st=shutLoad();
+  cards().forEach(c=>{
+    const h=c.querySelector('h3');h.dataset.k=h.textContent;h.classList.add('fh');h.tabIndex=0;h.setAttribute('role','button');
+    const t=()=>apply(c,!c.classList.contains('shut'),true);
+    h.onclick=t;h.onkeydown=e=>{if(e.key==='Enter'||e.key===' '){e.preventDefault();t();}};
+    apply(c,!!st[keyOf(c)],false);
+  });
+  const bar=el('div','foldbar'),mk=(txt,shut)=>{const b=el('button','pill',txt);b.type='button';
+    b.onclick=()=>{const o=shutLoad();cards().forEach(c=>{c.classList.toggle('shut',shut);c.querySelector('h3').setAttribute('aria-expanded',shut?'false':'true');
+      if(shut)o[keyOf(c)]=1;else delete o[keyOf(c)];});shutSave(o);};return b;};
+  bar.append(mk(TL('collapse_all'),true),mk(TL('expand_all'),false));
+  grid.parentNode.insertBefore(bar,grid);
 }
 function buildSet(){
   const root=$('#setGrid'),wifiCards=[];

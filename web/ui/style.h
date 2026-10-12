@@ -82,6 +82,15 @@ h2:first-child{margin-top:4px}
 .secbox.shut>.sech::after{content:"\25B8"}
 .secbox.shut>.secd,.secbox.shut>.setsec{display:none}
 .secbox+.secbox{margin-top:10px}
+.foldbar{display:flex;gap:6px;justify-content:flex-end;margin:0 0 8px}
+.card h3.fh{cursor:pointer;display:flex;justify-content:space-between;align-items:center;gap:8px;-webkit-user-select:none;user-select:none}
+.card h3.fh::after{content:"\25BE";font-size:13px;color:var(--accent);flex:none}
+.card-h h3.fh{display:block}
+.card-h h3.fh::after{content:"\25BE";margin-left:8px}
+.card.shut h3.fh::after{content:"\25B8"}
+.card.shut>:not(h3):not(.card-h){display:none}
+.card.shut{padding-bottom:8px}
+.card.shut>h3{margin-bottom:0}
 .secd{margin:6px 0 10px;font-size:13px;color:var(--label);line-height:1.5;max-width:70ch}
 .setsec{display:grid;grid-template-columns:repeat(auto-fill,minmax(min(100%,340px),1fr));gap:12px;align-items:start;margin-top:10px}
 .setsec .card{padding:14px 16px}

@@ -15,6 +15,7 @@ function buildRead(){
   [['/hydlift_manual_on','raise'],['/hydlift_manual_off','lower'],['/hydlift_auto','auto_agopenweb']].forEach(([u,k])=>{
     const b=el('button','btn',k==='raise'?TL('raise'):k==='lower'?TL('lower'):TL('auto_agopenweb'));b.dataset.post=u;if(k!=='auto_agopenweb')b.dataset.confirm='1';hb.appendChild(b);});
   hc.appendChild(hb);g.appendChild(hc);cardsRead.push(hc);
+  cardFolding(g);
 }
 function buildDiag(){
   const g=$('#diagGrid');
@@ -37,6 +38,7 @@ function buildDiag(){
     cardsDiag[key]={c,body,off,input,list,extra,d,jf};
     g.appendChild(c);
   });
+  foldLong($('#tab-diag'));cardFolding(g);
 }
 async function saveFlags(){
   flagPending=true;
@@ -344,6 +346,7 @@ function buildCal(){
     if(!(await askConfirm(TL('confirm_save_imu_rotation'))))return;
     await post('/settings_save_imu_rotation',{rotDeg:v,rollInvert:INP.setImuRollInvert.checked?'1':'0'},TL('board_rotation_saved'));});
   foldLong(g);   // the step-by-step instructions fold under "Details" (the cards stay short and line up)
+  cardFolding(g);
 }
 function updCal(s){
   $('#calAngle').textContent=s.steerSensorOk?f(s.steerAngleDeg,1,'°'):TL('none');
