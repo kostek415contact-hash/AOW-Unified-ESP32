@@ -236,62 +236,6 @@ int main() {
         Mount none; CHECK(format(none, buf, sizeof(buf)) == 0 && buf[0] == 0);
     }
 
-    // ----- 7b. the board's angles in the vehicle (shown in the panel) -----
-    {
-        Mount id; id.valid = true;
-        float y, p, r;
-        boardAngles(id, y, p, r);
-        CHECK(std::fabs(y) < 0.01f && std::fabs(p) < 0.01f && std::fabs(r) < 0.01f);
-        // a board turned by +30 deg in the plane of the vehicle: R(sensor->vehicle) = Rz(30), M = its transpose
-        Mount k; k.valid = true;
-        const float c = std::cos(30.0f * DEG2RAD), s = std::sin(30.0f * DEG2RAD);
-        const float mm[9] = {c, s, 0, -s, c, 0, 0, 0, 1};
-        for (int i = 0; i < 9; i++) k.m[i] = mm[i];
-        boardAngles(k, y, p, r);
-        CHECK(std::fabs(y - 30.0f) < 0.01f && std::fabs(p) < 0.01f && std::fabs(r) < 0.01f);
-        // what the calibration finds equals the true mounting angles (sensor axes in the vehicle: Rz(yaw) Ry(pitch) Rx(roll))
-        int checked = 0, good = 0;
-        const double mounts[][3] = {{90, 45, 0}, {90, -45, 0}, {30, 40, 20}, {-20, 35, 100}, {60, -30, 15}, {45, 0, 0}, {0, 45, 0}, {80, 10, -170}};
-        for (const auto& mt : mounts) for (int sp = -1; sp <= 1; sp += 2) for (int sr = -1; sr <= 1; sr += 2) {
-            Rig g{mt[0], mt[1], mt[2], sp, sr, 1, 55.0};     // sa = +1: the mount's axes are (forward, left, up) like the rig's
-            const Reading A = sense(g, vehicle(10, 0, 0)), B = sense(g, vehicle(10, 0, 12));
-            Mount m;
-            if (solve(poseOf(A), poseOf(B), Tilt::SIDE_RIGHT_DOWN, m) != Result::OK) continue;
-            boardAngles(m, y, p, r);
-            checked++;
-            if (std::fabs(wrap(y - mt[2])) < 0.1 && std::fabs(p - mt[1]) < 0.1 && std::fabs(wrap(r - mt[0])) < 0.1) good++;
-            else std::printf("  katy plytki: mount=%g,%g,%g -> yaw %.2f pitch %.2f roll %.2f\n", mt[0], mt[1], mt[2], y, p, r);
-        }
-        CHECK(checked >= 20 && good == checked);
-    }
-
-    // ----- 7c. angles typed by hand give the same mount as the calibration, and round-trip through boardAngles -----
-    {
-        int checked = 0, same = 0;
-        const double mounts[][3] = {{90, 45, 0}, {30, 40, 20}, {-20, 35, 100}, {60, -30, 15}, {0, 45, 0}, {45, 0, 0}};
-        for (const auto& mt : mounts) for (int sp = -1; sp <= 1; sp += 2) for (int sr = -1; sr <= 1; sr += 2) {
-            Rig g{mt[0], mt[1], mt[2], sp, sr, 1, -20.0};
-            const Reading A = sense(g, vehicle(10, 0, 0)), B = sense(g, vehicle(10, 0, 12));
-            Mount solved, manual;
-            if (solve(poseOf(A), poseOf(B), Tilt::SIDE_RIGHT_DOWN, solved) != Result::OK) continue;
-            checked++;
-            if (!fromBoardAngles((float)mt[2], (float)mt[1], (float)mt[0], solved.sp, solved.sr, solved.sa, manual)) continue;
-            bool eq = true;
-            for (int i = 0; i < 9; i++) if (std::fabs(manual.m[i] - solved.m[i]) > 2e-3f) eq = false;
-            if (eq) same++;
-        }
-        CHECK(checked >= 12 && same == checked);
-        float y, p, r; Mount k;
-        CHECK(fromBoardAngles(20, 45, -30, 1, 1, 1, k) && k.valid);
-        boardAngles(k, y, p, r);
-        CHECK(std::fabs(y - 20) < 0.01f && std::fabs(p - 45) < 0.01f && std::fabs(r + 30) < 0.01f);
-        CHECK(!fromBoardAngles(0, 80, 0, 1, 1, 1, k) && !k.valid);          // too close to standing on its edge
-        CHECK(!fromBoardAngles(200, 10, 0, 1, 1, 1, k));                    // out of range
-        CHECK(!fromBoardAngles(0, 100, 0, 1, 1, 1, k));
-        CHECK(!fromBoardAngles(NAN, 10, 0, 1, 1, 1, k));
-        CHECK(!fromBoardAngles(0, 10, 0, 0, 1, 1, k));                      // a sign must be +-1
-    }
-
     // ----- 8. mountOk rejects broken matrices -----
     {
         Mount k; k.valid = true;

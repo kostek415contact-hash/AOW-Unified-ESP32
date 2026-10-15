@@ -159,35 +159,6 @@ inline Result solve(const Pose& A, const Pose& B, Tilt kind, Mount& out) {
     return out.valid ? Result::OK : Result::BAD_INPUT;
 }
 
-// The board's own angles in the vehicle (what the calibration found): yaw (turned in the plane of the vehicle), pitch, roll in degrees,
-// as Z-Y-X Euler angles of the rotation sensor->vehicle, written in the vehicle axes (forward, y, z) of the mount. Information for the panel.
-inline void boardAngles(const Mount& k, float& yawDeg, float& pitchDeg, float& rollDeg) {
-    // R = M^T maps sensor coordinates to vehicle coordinates: R[i][j] = M[j][i]
-    const float r00 = k.m[0], r10 = k.m[1], r20 = k.m[2], r21 = k.m[5], r22 = k.m[8];
-    float s = -r20; if (s > 1.0f) s = 1.0f; if (s < -1.0f) s = -1.0f;
-    yawDeg = std::atan2(r10, r00) * RAD2DEG;
-    pitchDeg = std::asin(s) * RAD2DEG;
-    rollDeg = std::atan2(r21, r22) * RAD2DEG;
-}
-
-// The mount from the board's angles typed by hand (the inverse of boardAngles). The sign convention (sp, sr, sa) of the sensor cannot be known
-// from the angles - it is kept from an earlier calibration, or +1 +1 +1 is assumed. False when the angles are out of range or the board
-// would stand too close to its edge for the sensor's own Euler angles (see MAX_ABS_PITCH_DEG).
-inline bool fromBoardAngles(float yawDeg, float pitchDeg, float rollDeg, int sp, int sr, int sa, Mount& out) {
-    out = Mount();
-    if (!std::isfinite(yawDeg) || !std::isfinite(pitchDeg) || !std::isfinite(rollDeg)) return false;
-    if (std::fabs(yawDeg) > 180.0f || std::fabs(pitchDeg) > 90.0f || std::fabs(rollDeg) > 180.0f) return false;
-    float R[9];
-    detail::eulerZYX(yawDeg * DEG2RAD, pitchDeg * DEG2RAD, rollDeg * DEG2RAD, R);   // sensor -> vehicle
-    Mount k; k.sp = (int8_t)sp; k.sr = (int8_t)sr; k.sa = (int8_t)sa;
-    for (int i = 0; i < 3; i++) for (int j = 0; j < 3; j++) k.m[3 * i + j] = R[3 * j + i];   // M = R^T
-    // the vehicle's Z column is the world Z in the sensor axes while level: its X component is -sin(sensor pitch)
-    if (std::fabs(k.m[2]) > std::sin(MAX_ABS_PITCH_DEG * DEG2RAD)) return false;
-    if (!mountOk(k)) return false;
-    k.valid = true; out = k;
-    return true;
-}
-
 // ---------- text form (settings backup): "1;sp;sr;sa;m0,m1,...,m8" ----------
 inline int format(const Mount& k, char* buf, size_t n) {
     if (!k.valid) { if (n) buf[0] = 0; return 0; }

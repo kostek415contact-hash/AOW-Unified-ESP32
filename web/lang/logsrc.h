@@ -356,6 +356,5 @@ static const char WEB_LANG_LOGSRC[] PROGMEM = R"LANG(window.AOG_LOGSRC={
   "msg_imu_mount_04": "IMU mount: tilt too small - tilt the vehicle by at least 3 degrees",
   "msg_imu_mount_05": "IMU mount: could not tell the sensor's angle convention - tilt the vehicle sideways (right side down) instead of nose up, or the board lies nearly flat (use the board rotation), or the readings are noisy",
   "msg_imu_mount_06": "IMU mount: error",
-  "msg_server_37": "Required fields missing or invalid",
-  "msg_server_39": "IMU mount: the angles are out of range or the board would stand too close to its edge (pitch above 75 deg)"
+  "msg_server_37": "Required fields missing or invalid"
 };)LANG";

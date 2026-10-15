@@ -259,23 +259,14 @@ function buildCal(){
   g.appendChild(a);
   // IMU
   const b=document.createElement('article');b.className='card';
-  b.innerHTML='<h3>'+TL('imu_board_rotation_roll_pitch_correction')+'</h3><div id="imuCalRows"></div>'+
-   '<ol class="steps"><li>'+TL('after_mounting_place_the_enclosure_level')+'</li><li>'+TL('tilt_it_sideways_around_the_axis_along_the')+'</li><li>'+TL('the_angle_fills_in_by_itself_click_save')+'</li></ol>'+
-   '<p class="note">'+TL('imu_3d_hint')+'</p>'+
+  b.innerHTML='<h3>'+TL('imu_mounting_calibration_title')+'</h3><div id="imuCalRows"></div>'+
+   '<ol class="steps"><li>'+TL('after_mounting_place_the_enclosure_level')+'</li><li>'+TL('tilt_it_sideways_around_the_axis_along_the')+'</li><li>'+TL('imu_click_save_calibration')+'</li></ol>'+
    '<div class="btns"><button class="btn" id="imuA">'+TL('point_a_level')+'</button><button class="btn" id="imuB">'+TL('point_b_tilted')+'</button></div>'+
    '<div class="result" id="imuRes">'+TL('no_point_stored_yet')+'</div>'+
-   '<label class="field"><span>'+TL('imu_tilt_type')+'</span><select id="imuTilt"><option value="0">'+TL('imu_tilt_side_right_down')+'</option><option value="1">'+TL('imu_tilt_nose_up')+'</option></select></label>'+
-   '<div class="btns"><button class="btn primary" id="imu3d">'+TL('save_3d_mounting')+'</button><button class="btn" id="imu3dOff">'+TL('switch_3d_mounting_off')+'</button></div>'+
-   '<p class="note">'+TL('imu_manual_angles_hint')+'</p>'+
-   '<label class="field"><span>'+TL('imu_board_yaw_deg')+'</span><input id="setImuBy" type="number" step="0.1" min="-180" max="180"></label>'+
-   '<label class="field"><span>'+TL('imu_board_pitch_deg')+'</span><input id="setImuBp" type="number" step="0.1" min="-90" max="90"></label>'+
-   '<label class="field"><span>'+TL('imu_board_roll_deg')+'</span><input id="setImuBr" type="number" step="0.1" min="-180" max="180"></label>'+
-   '<div class="btns"><button class="btn" id="imuAng">'+TL('save_board_angles')+'</button></div>'+
-   '<label class="field"><span>'+TL('board_rotation_degrees')+'</span><input id="setImuRot" type="number" step="0.1"></label>'+
-   '<div class="btns"><button class="btn primary" id="imuSave">'+TL('save')+'</button></div>';
+   '<div class="btns"><button class="btn primary" id="imuSave">'+TL('save_imu_calibration')+'</button><button class="btn" id="imuReset">'+TL('reset_imu_calibration')+'</button></div>';
   b.insertBefore(sw('setImuRollInvert',TL('invert_roll_sign')),b.lastElementChild);
   g.appendChild(b);
-  INP.setSteerLeftDeg=$('#setSteerLeftDeg');INP.setSteerRightDeg=$('#setSteerRightDeg');INP.setImuRot=$('#setImuRot');INP.setImuBy=$('#setImuBy');INP.setImuBp=$('#setImuBp');INP.setImuBr=$('#setImuBr');
+  INP.setSteerLeftDeg=$('#setSteerLeftDeg');INP.setSteerRightDeg=$('#setSteerRightDeg');
   // motor current sensor (ACS71240)
   const cc=document.createElement('article');cc.className='card';cc.id='curCard';
   cc.innerHTML='<h3>'+TL('motor_current_sensor_acs71240_30_a')+'</h3><div class="big" id="curAmps">—</div><div class="bigs" id="curState">—</div>'+
@@ -342,10 +333,7 @@ function buildCal(){
   calCards.imuList=mkRows($('#imuCalRows'),[
    [TL('imu_angles_raw_sensor'),s=>f(s.imuRollRaw,1)+' / '+f(s.imuPitchRaw,1)+' / '+f(s.imuYawRaw,1)+'°'],
    [TL('imu_angles_after_correction'),s=>f(s.imuRoll,1)+' / '+f(s.imuPitch,1)+' / '+f(s.imuHeading,1)+'°'],
-   [TL('imu_3d_mounting'),s=>s.imuMount3d?TL('imu_mount_on'):TL('imu_mount_off'),()=>'ok'],
-   [TL('imu_board_angles'),s=>isNum(s.imuMountYaw)?f(s.imuMountYaw,1)+' / '+f(s.imuMountPitch,1)+' / '+f(s.imuMountRoll,1)+'°':'—',()=>'ok'],
-   [TL('saved_board_rotation'),s=>f(s.imuRotDeg,1,'°'),()=>'ok'],
-   [TL('roll_sign'),s=>s.imuRollInvert?TL('inverted'):TL('normal'),()=>'ok']]);
+   [TL('imu_3d_mounting'),s=>(s.imuMount3d||Math.abs(s.imuRotDeg)>0)?TL('imu_mount_on'):TL('imu_mount_off'),()=>'ok']]);
   act('#calL',async()=>{if(await askConfirm(TL('save_this_position_as_an_angle_end_point')))await post('/steering_cal_left',null,TL('left_saved_adc_n',{n:S?S.steerRaw:'?'}));});
   act('#calR',async()=>{if(await askConfirm(TL('save_this_position_as_an_angle_end_point')))await post('/steering_cal_right',null,TL('right_saved_adc_n',{n:S?S.steerRaw:'?'}));});
   act('#calRange',async()=>{
@@ -376,27 +364,32 @@ function buildCal(){
     const na=Math.hypot(A.ax,A.ay,A.az),nb=Math.hypot(B.ax,B.ay,B.az);
     const tilt=(na>0&&nb>0)?Math.acos(Math.max(-1,Math.min(1,(A.ax*B.ax+A.ay*B.ay+A.az*B.az)/(na*nb))))*180/Math.PI:0;
     lines.push(TL('imu_points_tilt',{t:tilt.toFixed(1)}));
-    const dr=B.r-A.r,dp=B.p-A.p;
-    if(Math.abs(dr)>=3){const psi=Math.atan(dp/dr)*180/Math.PI;$('#setImuRot').value=psi.toFixed(1);   // only for the plain board rotation below
-      lines.push(TL('roll_change_r_deg_pitch_change_p_deg',{r:dr.toFixed(1),p:dp.toFixed(1),o:psi.toFixed(1)}));}
     out.textContent=lines.join('\n');};
   act('#imuA',()=>mark('A'));act('#imuB',()=>mark('B'));
-  act('#imu3d',async()=>{
+  const rollInv=()=>INP.setImuRollInvert.checked?'1':'0';
+  // Save: a tilted board (the normal case) gets the full 3D calibration; a board that lies (nearly) flat only needs a turn around the
+  // vertical axis, which the module cannot tell apart from the 3D case, so that one is computed here from the two points.
+  act('#imuSave',async()=>{
     if(!A||!B){toast(TL('store_points_a_and_b_first'),'bad');return;}
     if(!(await askConfirm(TL('confirm_save_imu_mount3d'))))return;
-    const q=(P,k)=>String(P[k]);
-    await post('/imu_mount_solve',{aPitch:q(A,'p'),aRoll:q(A,'r'),aAx:q(A,'ax'),aAy:q(A,'ay'),aAz:q(A,'az'),
-      bPitch:q(B,'p'),bRoll:q(B,'r'),bAx:q(B,'ax'),bAy:q(B,'ay'),bAz:q(B,'az'),kind:$('#imuTilt').value},TL('imu_3d_mounting_saved'));});
-  act('#imuAng',async()=>{
-    const y=parseFloat(INP.setImuBy.value),p=parseFloat(INP.setImuBp.value),r=parseFloat(INP.setImuBr.value);
-    if(![y,p,r].every(isFinite)||Math.abs(y)>180||Math.abs(p)>90||Math.abs(r)>180){toast(TL('imu_board_angles_range'),'bad');return;}
-    if(!(await askConfirm(TL('confirm_save_imu_mount3d'))))return;
-    await post('/settings_save_imu_mount3d_angles',{yaw:y,pitch:p,roll:r},TL('imu_3d_mounting_saved'));});
-  act('#imu3dOff',async()=>{if(!(await askConfirm(TL('confirm_imu_mount3d_off'))))return;
-    await post('/settings_save_imu_mount3d',{m:''},TL('imu_3d_mounting_switched_off'));});
-  act('#imuSave',async()=>{const v=parseFloat($('#setImuRot').value);if(!isFinite(v)||Math.abs(v)>180){toast(TL('enter_a_number_in_the_range_180_180'),'bad');return;}
-    if(!(await askConfirm(TL('confirm_save_imu_rotation'))))return;
-    await post('/settings_save_imu_rotation',{rotDeg:v,rollInvert:INP.setImuRollInvert.checked?'1':'0'},TL('board_rotation_saved'));});
+    let ok;
+    if(Math.abs(A.p)<15&&Math.abs(A.r)<15){
+      const dr=B.r-A.r,dp=B.p-A.p;
+      if(Math.abs(dr)<3){toast(TL('imu_tilt_too_small_flat',{d:dr.toFixed(1)}),'bad');return;}
+      ok=await post('/settings_save_imu_rotation',{rotDeg:(Math.atan(dp/dr)*180/Math.PI).toFixed(1),rollInvert:rollInv()},TL('imu_calibration_saved'));
+      if(ok)await post('/settings_save_imu_mount3d',{m:''});
+    }else{
+      const q=(P,k)=>String(P[k]);
+      ok=await post('/imu_mount_solve',{aPitch:q(A,'p'),aRoll:q(A,'r'),aAx:q(A,'ax'),aAy:q(A,'ay'),aAz:q(A,'az'),
+        bPitch:q(B,'p'),bRoll:q(B,'r'),bAx:q(B,'ax'),bAy:q(B,'ay'),bAz:q(B,'az'),kind:'0'},TL('imu_calibration_saved'));
+      if(ok)await post('/settings_save_imu_rotation',{rotDeg:'0',rollInvert:rollInv()});   // the older single-angle rotation is no longer used
+    }});
+  act('#imuReset',async()=>{
+    if(!(await askConfirm(TL('confirm_imu_mount3d_off'))))return;
+    await post('/settings_save_imu_mount3d',{m:''});
+    await post('/settings_save_imu_rotation',{rotDeg:'0',rollInvert:rollInv()},TL('imu_calibration_reset'));});
+  INP.setImuRollInvert.addEventListener('change',()=>post('/settings_save_imu_rotation',
+    {rotDeg:String(S&&isNum(S.imuRotDeg)?S.imuRotDeg:0),rollInvert:rollInv()},TL('imu_calibration_saved')));
   foldLong(g);   // the step-by-step instructions fold under "Details" (the cards stay short and line up)
   cardFolding(g);
 }

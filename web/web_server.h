@@ -146,10 +146,6 @@ private:
     {   // 3D mounting in its text form (digits, ';' ',' '.' '-' only - safe inside JSON); empty = off
         char m3[160]; ImuMount::format(IMU_MOUNT3D, m3, sizeof(m3));
         json += "\"imuMount3d\":\"" + String(m3) + "\",";
-        if (IMU_MOUNT3D.valid) {   // the board's angles in the vehicle, for the panel (yaw / pitch / roll)
-            float by, bp, br; ImuMount::boardAngles(IMU_MOUNT3D, by, bp, br);
-            json += "\"imuMountYaw\":" + String(by, 1) + ",\"imuMountPitch\":" + String(bp, 1) + ",\"imuMountRoll\":" + String(br, 1) + ",";
-        }
     }
     json += "\"imuAccelX\":" + String(ImuSensor::getAccelX(), 2) + ",";
     json += "\"imuAccelY\":" + String(ImuSensor::getAccelY(), 2) + ",";
@@ -751,29 +747,6 @@ private:
     server.send(200, "text/plain", "OK");
   }
 
-  // The board's angles in the vehicle typed by hand (yaw / pitch / roll, degrees). The sensor's sign convention is kept from an earlier
-  // calibration; without one +1 +1 +1 is assumed (a calibration detects it - prefer that). Works immediately.
-  static void handleImuMountAngles() {
-    if (refuseWhileEngaged("IMU 3D mounting")) return;
-    float yaw, pitch, roll;
-    if (!server.hasArg("yaw") || !server.hasArg("pitch") || !server.hasArg("roll") ||
-        !SettingsValidation::parseFloatRange(server.arg("yaw").c_str(), -180.0f, 180.0f, &yaw) ||
-        !SettingsValidation::parseFloatRange(server.arg("pitch").c_str(), -90.0f, 90.0f, &pitch) ||
-        !SettingsValidation::parseFloatRange(server.arg("roll").c_str(), -180.0f, 180.0f, &roll)) {
-      server.send(400, "text/plain", MSG("Required fields missing or invalid"));
-      return;
-    }
-    const ImuMount::Mount cur = IMU_MOUNT3D;
-    const bool keep = cur.valid && ImuMount::mountOk(cur);
-    ImuMount::Mount m;
-    if (!ImuMount::fromBoardAngles(yaw, pitch, roll, keep ? cur.sp : 1, keep ? cur.sr : 1, keep ? cur.sa : 1, m)) {
-      server.send(400, "text/plain", MSG("IMU mount: the angles are out of range or the board would stand too close to its edge (pitch above 75 deg)"));
-      return;
-    }
-    RuntimeSettings::saveImuMount3d(m);
-    server.send(200, "text/plain", "OK");
-  }
-
   // Sets the 3D mounting from its text form (settings backup) or switches it off (m empty). Works immediately.
   static void handleSettingsSaveImuMount3d() {
     if (refuseWhileEngaged("IMU 3D mounting")) return;
@@ -1290,7 +1263,6 @@ public:
     server.on("/settings_save_imu_rotation", HTTP_POST, SECURED(handleSettingsSaveImuRotation));
     server.on("/imu_mount_solve", HTTP_POST, SECURED(handleImuMountSolve));
     server.on("/settings_save_imu_mount3d", HTTP_POST, SECURED(handleSettingsSaveImuMount3d));
-    server.on("/settings_save_imu_mount3d_angles", HTTP_POST, SECURED(handleImuMountAngles));
     server.on("/settings_save_agio_sender", HTTP_POST, SECURED(handleSettingsSaveAgioSender));
     server.on("/settings_save_agio_engage", HTTP_POST, SECURED(handleSettingsSaveAgioEngage));
     server.on("/imu_reset", HTTP_POST, SECURED(handleImuReset));

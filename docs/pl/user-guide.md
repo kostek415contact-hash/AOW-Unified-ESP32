@@ -107,25 +107,15 @@ Silnik pozostaje zablokowany, dopóki **oba** punkty nie zostały zapisane przyn
 Ustawień kalibracji, silnika, ochrony prądowej, zakresu i funkcji nie można zmieniać przy włączonym prowadzeniu w AgOpenWeb -
 panel odpowie „Prowadzenie jest włączone” - więc najpierw wyłącz prowadzenie.
 
-**Obrót płytki IMU** (koryguje roll/pitch przy przechylonym montażu):
-1. Zamontuj obudowę i ustaw maszynę poziomo → **Punkt A**.
-2. Przechyl ją na bok o 10-15° wokół osi jazdy → **Punkt B**.
-3. Wpisz kąt i **Zapisz**. Jeśli AgOpenWeb pokazuje przechył w złą stronę, zaznacz **Odwróć znak rollu** przed zapisem.
-
-**Montaż 3D IMU** (płytka jest pochylona w obudowie, np. obudowa na ścianie kabiny z płytką pod 45°): zwykły obrót powyżej obraca
-roll/pitch tylko wokół osi pionowej, więc przy takim montażu kurs, przechył i pochylenie są błędne (błąd kursu na zboczu jest mniej
-więcej tak duży jak samo zbocze). Użyj montażu 3D:
+**Kalibracja montażu IMU** (Kalibracja -> IMU): koryguje kurs, roll i pitch dla dowolnego montażu płytki, także pochylonej w obudowie
+(np. obudowa na ścianie kabiny z płytką pod 45°):
 1. Ustaw maszynę na równym terenie, trzymaj w bezruchu → **Punkt A: poziomo** (panel uśrednia ok. 2 s).
-2. Przechyl całą maszynę o **10-15°**, najlepiej na bok prawą stroną w dół (np. prawe koła na deskę) → **Punkt B: przechył**
-   z wybranym „Na bok, prawa strona w dół”. „Nosem w górę” (przednie koła na podjazd) działa przy większości montaży, ale nie gdy
-   normalna płytki wskazuje na bok - panel poprosi wtedy o przechył na bok.
-3. **Zapisz montaż 3D.** Moduł z odczytu grawitacji sam rozpoznaje konwencję znaków kątów czujnika, a gdy się nie da, odmawia
-   z podaniem powodu (przechył poniżej 3°, płytka stoi niemal na krawędzi, płytka leży płasko - użyj wtedy obrotu płytki).
-   Karta pokazuje wartości obu punktów, przechył między nimi, a potem znalezione kąty płytki w pojeździe (yaw / pitch / roll), obok odczytów kursu i przyspieszenia.
-   Trzy pola **Yaw / pitch / roll płytki w pojeździe** zawierają znalezione kąty; możesz je też wpisać ręcznie i nacisnąć **Zapisz kąty płytki**
-   (konwencja znaków czujnika jest wtedy zachowana z ostatniej kalibracji albo przyjmowana standardowa - lepiej użyć kalibracji).
-   Zastępuje obrót płytki; **Wyłącz montaż 3D** przywraca zwykły obrót. Jeśli AgOpenWeb nadal pokazuje przechył w złą stronę,
-   zaznacz **Odwróć znak rollu**. Montaż 3D jest w kopii zapasowej ustawień.
+2. Przechyl całą maszynę o **10-15°** na bok, prawą stroną w dół (np. prawe koła na deskę), trzymaj w bezruchu → **Punkt B: przechył**.
+3. **Zapisz kalibrację.** Karta pokazuje wartości obu punktów i przechył między nimi. Moduł sam znajduje wszystkie kąty płytki i z odczytu
+   grawitacji uczy się konwencji znaków kątów czujnika; gdy się nie da, odmawia z podaniem powodu (przechył poniżej 3°, płytka stoi
+   niemal na krawędzi, odczyty nie są stabilne). Płytka leżąca płasko wymaga tylko obrotu wokół pionu, który zapisuje się tak samo.
+   **Resetuj kalibrację** wysyła roll, pitch i kurs tak, jak mierzy czujnik. Jeśli AgOpenWeb pokazuje przechył w złą stronę, włącz
+   **Odwróć znak rollu**. Kalibracja jest w kopii zapasowej ustawień.
 
 **Czujnik prądu silnika:** przy wyłączonym silniku i wyłączonym prowadzeniu naciśnij **Zeruj** (uśrednianie ok. 1-2 s).
 Potem ustaw próg prądu (kickout), jego czas i próg twardy odpowiednio do silnika i **Zapisz progi**.

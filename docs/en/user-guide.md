@@ -106,25 +106,15 @@ The motor stays blocked until **both** points have been saved at least once (a s
 The calibration, motor, current-protection, range and feature settings cannot be changed while steering is engaged in AgOpenWeb -
 the panel answers "Steering is engaged" - so disengage steering first.
 
-**IMU board rotation** (corrects roll/pitch for a tilted mounting):
-1. Mount the enclosure and put the machine level → **Point A**.
-2. Tilt it sideways by 10-15° around the driving axis → **Point B**.
-3. Enter the angle and **Save**. If AgOpenWeb shows the tilt the wrong way, tick **Invert roll sign** before saving.
-
-**IMU 3D mounting** (the board is tilted inside the enclosure, e.g. an enclosure on the cab wall with the board at 45°): the plain
-rotation above only turns roll/pitch around the vertical axis, so on such a mounting heading, roll and pitch are all wrong (the heading
-error on a slope is about as large as the slope). Use the 3D mounting instead:
+**IMU mounting calibration** (Calibration -> IMU): corrects heading, roll and pitch for any mounting of the board, also one tilted inside
+the enclosure (e.g. an enclosure on the cab wall with the board at 45°):
 1. Stand the machine on level ground, hold it still → **Point A: level** (the panel averages about 2 s).
-2. Tilt the whole machine by **10-15°**, best sideways with the right side down (e.g. the right wheels on a plank) → **Point B: tilted**
-   with "Sideways, right side down" selected. "Nose up" (front wheels on a ramp) works for most mountings but not when the board's
-   normal points sideways - the panel then asks for the sideways tilt.
-3. **Save 3D mounting.** The module reads the sensor's gravity reading to learn the sign convention of its angles by itself and refuses
-   with a reason when it cannot (tilt under 3°, board standing almost on its edge, board lying flat - use the board rotation then).
-   The card shows the values of both points, the tilt between them and, afterwards, the angles of the board in the vehicle that were found (yaw / pitch / roll), next to the heading and acceleration readings.
-   The three **Board yaw / pitch / roll in the vehicle** fields hold the found angles; you can also type them by hand and press **Save board angles**
-   (the sign convention of the sensor is then kept from the last calibration, or the standard one is assumed - prefer the calibration).
-   It replaces the board rotation; **Switch 3D mounting off** brings the plain rotation back. If AgOpenWeb still shows the roll the wrong
-   way round, tick **Invert roll sign**. The 3D mounting is included in the settings backup.
+2. Tilt the whole machine by **10-15°** sideways, right side down (e.g. the right wheels on a plank), hold it still → **Point B: tilted**.
+3. **Save calibration.** The card shows the values of both points and the tilt between them. The module finds all the angles of the board
+   by itself and learns the sign convention of the sensor's angles from its gravity reading; it refuses with a reason when it cannot
+   (tilt under 3°, board standing almost on its edge, readings not steady). A board that lies flat only needs a turn around the vertical
+   axis, which is saved the same way. **Reset calibration** sends roll, pitch and heading as the sensor measures them. If AgOpenWeb shows the
+   roll the wrong way round, switch **Invert roll sign**. The calibration is included in the settings backup.
 
 **Motor current sensor:** with the motor off and steering disengaged press **Zero** (about 1-2 s of averaging). Then set the
 current threshold (kick-out), its time and the hard limit to suit your motor, and **Save thresholds**.
