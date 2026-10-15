@@ -337,7 +337,10 @@ function buildCal(){
   calCards.imuList=mkRows($('#imuCalRows'),[
    [TL('roll_pitch_raw_sensor'),s=>f(s.imuRollRaw,1)+' / '+f(s.imuPitchRaw,1)+'°'],
    [TL('roll_pitch_after_correction_agopenweb'),s=>f(s.imuRoll,1)+' / '+f(s.imuPitch,1)+'°'],
+   [TL('imu_heading_raw_corrected'),s=>f(s.imuYawRaw,1)+' / '+f(s.imuHeading,1)+'°'],
+   [TL('acceleration_x_y_z'),s=>f(s.imuAccelX,2)+' / '+f(s.imuAccelY,2)+' / '+f(s.imuAccelZ,2)+' m/s²'],
    [TL('imu_3d_mounting'),s=>s.imuMount3d?TL('imu_mount_on'):TL('imu_mount_off'),()=>'ok'],
+   [TL('imu_board_angles'),s=>isNum(s.imuMountYaw)?f(s.imuMountYaw,1)+' / '+f(s.imuMountPitch,1)+' / '+f(s.imuMountRoll,1)+'°':'—',()=>'ok'],
    [TL('saved_board_rotation'),s=>f(s.imuRotDeg,1,'°'),()=>'ok'],
    [TL('roll_sign'),s=>s.imuRollInvert?TL('inverted'):TL('normal'),()=>'ok']]);
   act('#calL',async()=>{if(await askConfirm(TL('save_this_position_as_an_angle_end_point')))await post('/steering_cal_left',null,TL('left_saved_adc_n',{n:S?S.steerRaw:'?'}));});
@@ -361,12 +364,19 @@ function buildCal(){
     if(!acc.n){toast(TL('imu_no_data'),'bad');return;}
     const p={r:Math.atan2(acc.sr,acc.cr)*180/Math.PI,p:acc.p/acc.n,ax:acc.x/acc.n,ay:acc.y/acc.n,az:acc.z/acc.n};if(w==='A')A=p;else B=p;
     toast(TL('imu_point_n_stored',{n:w}),'ok');
-    const out=$('#imuRes');
-    if(!A||!B){out.textContent=TL('stored_p_now_store_the_second_point',{p:(A?'A ':'')+(B?'B':'')});return;}
+    const out=$('#imuRes');out.style.whiteSpace='pre-line';
+    // what is stored so far: the values of each point (so the person sees exactly what the 3D mounting will be computed from)
+    const pv=(n,P)=>TL('imu_point_values',{n:n,r:P.r.toFixed(1),p:P.p.toFixed(1),a:Math.hypot(P.ax,P.ay,P.az).toFixed(2)});
+    const lines=[];if(A)lines.push(pv('A',A));if(B)lines.push(pv('B',B));
+    if(!A||!B){lines.push(TL('stored_p_now_store_the_second_point',{p:(A?'A ':'')+(B?'B':'')}));out.textContent=lines.join('\n');return;}
+    // the tilt between the poses from the accelerometer (needs no convention): 3 deg is the minimum, 10-15 deg is reliable
+    const na=Math.hypot(A.ax,A.ay,A.az),nb=Math.hypot(B.ax,B.ay,B.az);
+    const tilt=(na>0&&nb>0)?Math.acos(Math.max(-1,Math.min(1,(A.ax*B.ax+A.ay*B.ay+A.az*B.az)/(na*nb))))*180/Math.PI:0;
+    lines.push(TL('imu_points_tilt',{t:tilt.toFixed(1)}));
     const dr=B.r-A.r,dp=B.p-A.p;
-    if(Math.abs(dr)<3){out.textContent=TL('tilt_too_small_roll_change_d_deg_need_3deg',{d:dr.toFixed(1)});return;}
-    const psi=Math.atan(dp/dr)*180/Math.PI;$('#setImuRot').value=psi.toFixed(1);
-    out.textContent=TL('roll_change_r_deg_pitch_change_p_deg',{r:dr.toFixed(1),p:dp.toFixed(1),o:psi.toFixed(1)});};
+    if(Math.abs(dr)>=3){const psi=Math.atan(dp/dr)*180/Math.PI;$('#setImuRot').value=psi.toFixed(1);   // only for the plain board rotation below
+      lines.push(TL('roll_change_r_deg_pitch_change_p_deg',{r:dr.toFixed(1),p:dp.toFixed(1),o:psi.toFixed(1)}));}
+    out.textContent=lines.join('\n');};
   act('#imuA',()=>mark('A'));act('#imuB',()=>mark('B'));
   act('#imu3d',async()=>{
     if(!A||!B){toast(TL('store_points_a_and_b_first'),'bad');return;}

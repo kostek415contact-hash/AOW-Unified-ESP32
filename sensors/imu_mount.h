@@ -156,6 +156,17 @@ inline Result solve(const Pose& A, const Pose& B, Tilt kind, Mount& out) {
     return out.valid ? Result::OK : Result::BAD_INPUT;
 }
 
+// The board's own angles in the vehicle (what the calibration found): yaw (turned in the plane of the vehicle), pitch, roll in degrees,
+// as Z-Y-X Euler angles of the rotation sensor->vehicle, written in the vehicle axes (forward, y, z) of the mount. Information for the panel.
+inline void boardAngles(const Mount& k, float& yawDeg, float& pitchDeg, float& rollDeg) {
+    // R = M^T maps sensor coordinates to vehicle coordinates: R[i][j] = M[j][i]
+    const float r00 = k.m[0], r10 = k.m[1], r20 = k.m[2], r21 = k.m[5], r22 = k.m[8];
+    float s = -r20; if (s > 1.0f) s = 1.0f; if (s < -1.0f) s = -1.0f;
+    yawDeg = std::atan2(r10, r00) * RAD2DEG;
+    pitchDeg = std::asin(s) * RAD2DEG;
+    rollDeg = std::atan2(r21, r22) * RAD2DEG;
+}
+
 // ---------- text form (settings backup): "1;sp;sr;sa;m0,m1,...,m8" ----------
 inline int format(const Mount& k, char* buf, size_t n) {
     if (!k.valid) { if (n) buf[0] = 0; return 0; }

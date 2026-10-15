@@ -140,11 +140,16 @@ private:
     json += "\"imuRoll\":" + String(ImuSensor::getRollDeg(), 1) + ",";
     json += "\"imuRollRaw\":" + String(ImuSensor::getRawRollDeg(), 2) + ",";
     json += "\"imuPitchRaw\":" + String(ImuSensor::getRawPitchDeg(), 2) + ",";
+    json += "\"imuYawRaw\":" + String(ImuSensor::getRawYawDeg(), 1) + ",";
     json += "\"imuRotDeg\":" + String(IMU_MOUNT_ROTATION_DEG, 1) + ",";
     json += "\"imuRollInvert\":" + String(IMU_ROLL_INVERT ? "true" : "false") + ",";
     {   // 3D mounting in its text form (digits, ';' ',' '.' '-' only - safe inside JSON); empty = off
         char m3[160]; ImuMount::format(IMU_MOUNT3D, m3, sizeof(m3));
         json += "\"imuMount3d\":\"" + String(m3) + "\",";
+        if (IMU_MOUNT3D.valid) {   // the board's angles in the vehicle, for the panel (yaw / pitch / roll)
+            float by, bp, br; ImuMount::boardAngles(IMU_MOUNT3D, by, bp, br);
+            json += "\"imuMountYaw\":" + String(by, 1) + ",\"imuMountPitch\":" + String(bp, 1) + ",\"imuMountRoll\":" + String(br, 1) + ",";
+        }
     }
     json += "\"imuAccelX\":" + String(ImuSensor::getAccelX(), 2) + ",";
     json += "\"imuAccelY\":" + String(ImuSensor::getAccelY(), 2) + ",";

@@ -398,6 +398,7 @@ public:
     static float getRawRollDeg() { return rawRollDeg; }    // raw from the sensor (for calibration)
     static float getRawPitchDeg() { return rawPitchDeg; }
     static bool isMount3dActive() { return IMU_MOUNT3D.valid; }
+    static float getRawYawDeg() { return rawYawDeg; }      // raw yaw from the sensor (before the mounting offset and the 3D mounting)
     static float getAccelX() { return accelX; }
     static float getAccelY() { return accelY; }
     static float getAccelZ() { return accelZ; }

@@ -121,6 +121,7 @@ więcej tak duży jak samo zbocze). Użyj montażu 3D:
    normalna płytki wskazuje na bok - panel poprosi wtedy o przechył na bok.
 3. **Zapisz montaż 3D.** Moduł z odczytu grawitacji sam rozpoznaje konwencję znaków kątów czujnika, a gdy się nie da, odmawia
    z podaniem powodu (przechył poniżej 3°, płytka stoi niemal na krawędzi, płytka leży płasko - użyj wtedy obrotu płytki).
+   Karta pokazuje wartości obu punktów, przechył między nimi, a potem znalezione kąty płytki w pojeździe (yaw / pitch / roll), obok odczytów kursu i przyspieszenia.
    Zastępuje obrót płytki; **Wyłącz montaż 3D** przywraca zwykły obrót. Jeśli AgOpenWeb nadal pokazuje przechył w złą stronę,
    zaznacz **Odwróć znak rollu**. Montaż 3D jest w kopii zapasowej ustawień.
 

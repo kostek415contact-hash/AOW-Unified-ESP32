@@ -120,6 +120,7 @@ error on a slope is about as large as the slope). Use the 3D mounting instead:
    normal points sideways - the panel then asks for the sideways tilt.
 3. **Save 3D mounting.** The module reads the sensor's gravity reading to learn the sign convention of its angles by itself and refuses
    with a reason when it cannot (tilt under 3°, board standing almost on its edge, board lying flat - use the board rotation then).
+   The card shows the values of both points, the tilt between them and, afterwards, the angles of the board in the vehicle that were found (yaw / pitch / roll), next to the heading and acceleration readings.
    It replaces the board rotation; **Switch 3D mounting off** brings the plain rotation back. If AgOpenWeb still shows the roll the wrong
    way round, tick **Invert roll sign**. The 3D mounting is included in the settings backup.
 
