@@ -346,5 +346,15 @@ static const char WEB_LANG_LOGSRC[] PROGMEM = R"LANG(window.AOG_LOGSRC={
   "log_machine_cfg_02": "[MACHINE CFG] Invert relay %s - saved to the module memory.",
   "msg_server_38": "No HydUp / HydDown pin in the AgOpenWeb Pin Config",
   "log_ota_09": "[OTA] Update discarded: steering was engaged during the upload.",
-  "log_boot_01": "[BOOT] Self-check: angle=%s IMU=%s expander=%s current=%s GPS=%s net=%s"
+  "log_boot_01": "[BOOT] Self-check: angle=%s IMU=%s expander=%s current=%s GPS=%s net=%s",
+  "log_settings_25": "[SETTINGS] WARNING: the saved IMU 3D mounting is invalid - switched off.",
+  "log_settings_26": "[SETTINGS] IMU 3D mounting saved.",
+  "log_settings_27": "[SETTINGS] IMU 3D mounting switched off.",
+  "msg_imu_mount_01": "IMU mount: invalid input (no sensor reading?)",
+  "msg_imu_mount_02": "IMU mount: the accelerometer does not read about 9.8 m/s2 - hold the vehicle still",
+  "msg_imu_mount_03": "IMU mount: the board is too close to standing on its edge (pitch above 75 deg) - rotate it in its own plane",
+  "msg_imu_mount_04": "IMU mount: tilt too small - tilt the vehicle by at least 3 degrees",
+  "msg_imu_mount_05": "IMU mount: could not tell the sensor's angle convention - tilt the vehicle sideways (right side down) instead of nose up, or the board lies nearly flat (use the board rotation), or the readings are noisy",
+  "msg_imu_mount_06": "IMU mount: error",
+  "msg_server_37": "Required fields missing or invalid"
 };)LANG";

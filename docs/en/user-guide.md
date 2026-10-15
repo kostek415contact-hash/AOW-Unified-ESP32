@@ -8,50 +8,6 @@ The panel is a web page served by the module itself - no app and no internet nee
 `http://AOG-ESP32.local`, at the module's IP, or at `192.168.4.1` in access-point mode. The language (Polish / English)
 and the theme (dark / light / blue) are picked in the page header.
 
-Handy details: the panel reopens on the tab you used last. On every tab except Status a slim bar under the header shows
-"Ready to drive" (or the first things that are not ready); tap it to open Status. The **A+** button in the header switches
-field mode (larger buttons, inputs and tabs for use in a tractor cab); it is remembered in the browser. In Settings the
-categories (Network, AgOpenWeb connection, ...) fold by tapping their title - only the first starts open - and the search box
-at the top filters the settings by name or description; the last five cards you edited appear above them as shortcuts ("Recently edited"). On a phone, field mode makes the tab bar scroll sideways. The Log tab has **Diagnostic report** (download) and **Copy report** (to the clipboard, secrets hidden) for bug reports.
-
-## On a computer, tablet and phone
-
-The same panel adapts to the screen: on a computer the cards sit side by side, on a tablet in two columns, and on a phone the tabs move to the bottom of the screen. Pictures of every main tab:
-
-<table>
-<tr><th>Computer</th><th>Tablet</th><th>Phone</th></tr>
-<tr><td colspan="3"><b>Status</b></td></tr>
-<tr>
-<td valign="top"><img src="../img/panel-status-en.png" alt="Status" width="420"></td>
-<td valign="top"><img src="../img/panel-status-tablet-en.png" alt="Status" width="300"></td>
-<td valign="top"><img src="../img/panel-status-phone-en.png" alt="Status" width="150"></td>
-</tr>
-<tr><td colspan="3"><b>Readings</b></td></tr>
-<tr>
-<td valign="top"><img src="../img/panel-readings-en.png" alt="Readings" width="420"></td>
-<td valign="top"><img src="../img/panel-readings-tablet-en.png" alt="Readings" width="300"></td>
-<td valign="top"><img src="../img/panel-readings-phone-en.png" alt="Readings" width="150"></td>
-</tr>
-<tr><td colspan="3"><b>Charts</b></td></tr>
-<tr>
-<td valign="top"><img src="../img/panel-charts-en.png" alt="Charts" width="420"></td>
-<td valign="top"><img src="../img/panel-charts-tablet-en.png" alt="Charts" width="300"></td>
-<td valign="top"><img src="../img/panel-charts-phone-en.png" alt="Charts" width="150"></td>
-</tr>
-<tr><td colspan="3"><b>Calibration</b></td></tr>
-<tr>
-<td valign="top"><img src="../img/panel-calibration-en.png" alt="Calibration" width="420"></td>
-<td valign="top"><img src="../img/panel-calibration-tablet-en.png" alt="Calibration" width="300"></td>
-<td valign="top"><img src="../img/panel-calibration-phone-en.png" alt="Calibration" width="150"></td>
-</tr>
-<tr><td colspan="3"><b>Settings</b></td></tr>
-<tr>
-<td valign="top"><img src="../img/panel-settings-en.png" alt="Settings" width="420"></td>
-<td valign="top"><img src="../img/panel-settings-tablet-en.png" alt="Settings" width="300"></td>
-<td valign="top"><img src="../img/panel-settings-phone-en.png" alt="Settings" width="150"></td>
-</tr>
-</table>
-
 ## Status
 
 ![Status tab](../img/panel-status-en.png)
@@ -68,8 +24,6 @@ Every live value in one place: GPS position and accuracy, speed and heading, inp
 (target angle, speed, sections), network and RTCM, system load and memory. The **Hydraulics** card shows the lift state and
 who controls it (AgOpenWeb or manual) and has the Raise / Lower / Auto buttons. Raise and Lower ask for confirmation; Auto
 always works, and a restart always returns to automatic.
-
-In Readings and Calibration a card folds when you tap its title; **Collapse all** / **Expand all** above the cards do it for the whole tab, and the browser remembers your choice. Long explanations everywhere are folded under **Details**.
 
 ## Charts
 
@@ -111,6 +65,18 @@ the panel answers "Steering is engaged" - so disengage steering first.
 2. Tilt it sideways by 10-15° around the driving axis → **Point B**.
 3. Enter the angle and **Save**. If AgOpenWeb shows the tilt the wrong way, tick **Invert roll sign** before saving.
 
+**IMU 3D mounting** (the board is tilted inside the enclosure, e.g. an enclosure on the cab wall with the board at 45°): the plain
+rotation above only turns roll/pitch around the vertical axis, so on such a mounting heading, roll and pitch are all wrong (the heading
+error on a slope is about as large as the slope). Use the 3D mounting instead:
+1. Stand the machine on level ground, hold it still → **Point A: level** (the panel averages about 2 s).
+2. Tilt the whole machine by **10-15°**, best sideways with the right side down (e.g. the right wheels on a plank) → **Point B: tilted**
+   with "Sideways, right side down" selected. "Nose up" (front wheels on a ramp) works for most mountings but not when the board's
+   normal points sideways - the panel then asks for the sideways tilt.
+3. **Save 3D mounting.** The module reads the sensor's gravity reading to learn the sign convention of its angles by itself and refuses
+   with a reason when it cannot (tilt under 3°, board standing almost on its edge, board lying flat - use the board rotation then).
+   It replaces the board rotation; **Switch 3D mounting off** brings the plain rotation back. If AgOpenWeb still shows the roll the wrong
+   way round, tick **Invert roll sign**. The 3D mounting is included in the settings backup.
+
 **Motor current sensor:** with the motor off and steering disengaged press **Zero** (about 1-2 s of averaging). Then set the
 current threshold (kick-out), its time and the hard limit to suit your motor, and **Save thresholds**.
 
@@ -124,7 +90,7 @@ stops the motor within a fraction of a second; tick **Reverse motor direction (D
 
 The tab is split into titled sections - Network, AgOpenWeb connection, Panel security and backup, RTK corrections (NTRIP),
 Hardware and timing, Diagnostic logging, Module - with buttons at the top to jump to one. Long explanations are folded under
-"Details". On a phone every section can be folded by tapping its title, and only the first one starts open.
+"Details".
 
 | Card | What it does |
 |---|---|

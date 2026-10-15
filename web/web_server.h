@@ -142,6 +142,10 @@ private:
     json += "\"imuPitchRaw\":" + String(ImuSensor::getRawPitchDeg(), 2) + ",";
     json += "\"imuRotDeg\":" + String(IMU_MOUNT_ROTATION_DEG, 1) + ",";
     json += "\"imuRollInvert\":" + String(IMU_ROLL_INVERT ? "true" : "false") + ",";
+    {   // 3D mounting in its text form (digits, ';' ',' '.' '-' only - safe inside JSON); empty = off
+        char m3[160]; ImuMount::format(IMU_MOUNT3D, m3, sizeof(m3));
+        json += "\"imuMount3d\":\"" + String(m3) + "\",";
+    }
     json += "\"imuAccelX\":" + String(ImuSensor::getAccelX(), 2) + ",";
     json += "\"imuAccelY\":" + String(ImuSensor::getAccelY(), 2) + ",";
     json += "\"imuAccelZ\":" + String(ImuSensor::getAccelZ(), 2) + ",";
@@ -712,6 +716,46 @@ private:
     server.send(200, "text/plain", "OK");
   }
 
+  // One pose of the 3D mounting calibration: <pre>Pitch, <pre>Roll (the sensor's raw angles, deg) and <pre>Ax/Ay/Az (accelerometer, m/s2).
+  static bool readMountPose(const char* pre, ImuMount::Pose* p) {
+    const char* suffix[5] = {"Pitch", "Roll", "Ax", "Ay", "Az"};
+    const float lim[5] = {90.0f, 180.0f, 200.0f, 200.0f, 200.0f};
+    float v[5];
+    for (int i = 0; i < 5; i++) {
+      const String name = String(pre) + suffix[i];
+      if (!server.hasArg(name) || !SettingsValidation::parseFloatRange(server.arg(name).c_str(), -lim[i], lim[i], &v[i])) return false;
+    }
+    *p = ImuMount::Pose{v[0], v[1], ImuMount::V3{v[2], v[3], v[4]}};
+    return true;
+  }
+
+  // Full 3D mounting of the IMU board (sensors/imu_mount.h): solved from two poses (A level, B tilted), then saved. Works immediately.
+  static void handleImuMountSolve() {
+    if (refuseWhileEngaged("IMU 3D mounting")) return;   // changes the heading, roll and pitch used for steering
+    ImuMount::Pose a, b;
+    if (!readMountPose("a", &a) || !readMountPose("b", &b) || !server.hasArg("kind")) {
+      server.send(400, "text/plain", MSG("Required fields missing or invalid"));
+      return;
+    }
+    const String kind = server.arg("kind");
+    if (kind != "0" && kind != "1") { server.send(400, "text/plain", MSG("Invalid value")); return; }
+    ImuMount::Mount m;
+    const ImuMount::Result r = ImuMount::solve(a, b, kind == "1" ? ImuMount::Tilt::NOSE_UP : ImuMount::Tilt::SIDE_RIGHT_DOWN, m);
+    if (r != ImuMount::Result::OK) { server.send(400, "text/plain", ImuMount::resultText(r)); return; }
+    RuntimeSettings::saveImuMount3d(m);
+    server.send(200, "text/plain", "OK");
+  }
+
+  // Sets the 3D mounting from its text form (settings backup) or switches it off (m empty). Works immediately.
+  static void handleSettingsSaveImuMount3d() {
+    if (refuseWhileEngaged("IMU 3D mounting")) return;
+    if (!server.hasArg("m")) { server.send(400, "text/plain", MSG("Required fields missing")); return; }
+    ImuMount::Mount m;
+    if (!ImuMount::parse(server.arg("m").c_str(), m)) { server.send(400, "text/plain", MSG("Invalid value")); return; }
+    RuntimeSettings::saveImuMount3d(m);
+    server.send(200, "text/plain", "OK");
+  }
+
   // Choosing the AgOpenWeb sender: ip = address (pinning, only this sender) or empty (automatic mode). Works immediately.
   // ---- panel protection (PIN / password): see web/panel_auth.h ----
   // Every state-CHANGING handler is registered through SECURED(): without a valid token (X-Auth header) it answers 401.
@@ -1216,6 +1260,8 @@ public:
     server.on("/current_zero", HTTP_POST, SECURED(handleCurrentZero));
     server.on("/current_reset", HTTP_POST, SECURED(handleCurrentReset));
     server.on("/settings_save_imu_rotation", HTTP_POST, SECURED(handleSettingsSaveImuRotation));
+    server.on("/imu_mount_solve", HTTP_POST, SECURED(handleImuMountSolve));
+    server.on("/settings_save_imu_mount3d", HTTP_POST, SECURED(handleSettingsSaveImuMount3d));
     server.on("/settings_save_agio_sender", HTTP_POST, SECURED(handleSettingsSaveAgioSender));
     server.on("/settings_save_agio_engage", HTTP_POST, SECURED(handleSettingsSaveAgioEngage));
     server.on("/imu_reset", HTTP_POST, SECURED(handleImuReset));

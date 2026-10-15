@@ -34,6 +34,7 @@ static const char* FIRMWARE_VERSION = FIRMWARE_MAJOR_MINOR "." FIRMWARE_PATCH;
 #include <Arduino.h>
 #include <IPAddress.h>
 #include <WiFiUdp.h>
+#include "../sensors/imu_mount.h"
 
 // ===== NETWORK / TRANSPORT =====
 // WIFI_SSID/WIFI_PASS/AP_SSID/AP_PASSWORD are now a String, not const char* -
@@ -284,6 +285,10 @@ static float IMU_MOUNT_ROTATION_DEG = 0.0f;
 // Flip the sign of the roll sent to AgOpenWeb (a board mounted the other way round, or roll that tilts the wrong way
 // in AgOpenWeb). Changeable in the web panel (Calibration -> IMU), works immediately. false = roll as measured.
 static bool IMU_ROLL_INVERT = false;
+// Full 3D mounting of the board (sensors/imu_mount.h): the board may sit at ANY fixed angle (e.g. an enclosure on the cab wall with
+// the board tilted 45 deg). Set from the web panel: Calibration -> IMU -> "3D mounting" (two poses: level, then tilted sideways).
+// When valid it REPLACES the plain board rotation above; heading, pitch and roll are then those of the vehicle.
+static ImuMount::Mount IMU_MOUNT3D;   // valid = false: off
 // GPIO6 - a free pin, it does not collide with anything currently used. Confirm on the
 // silkscreen of your ESP32-S3 board that it is broken out when the
 // BNO085 arrives - see uncertainty #3 in sensors/imu_sensor.h.

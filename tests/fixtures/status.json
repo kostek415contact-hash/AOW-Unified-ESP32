@@ -22,6 +22,7 @@
  "imuRollRaw": 1.2,
  "imuPitchRaw": -0.4,
  "imuRotDeg": 0,
+ "imuMount3d": "",
  "imuRollInvert": false,
  "imuAccelX": 0,
  "imuAccelY": 0,

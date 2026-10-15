@@ -12,6 +12,7 @@
 #include <HardwareSerial.h>
 #include <Adafruit_BNO08x_RVC.h>
 #include "../config/config.h"
+#include "imu_mount.h"
 #include "../web/log_buffer.h"
 #include "live_window.h"
 
@@ -117,6 +118,21 @@ private:
     // The angle psi is determined by the web panel (IMU Calibration): psi = atan(dPitch / dRoll)
     // for a sideways tilt.
     static void applyMountRotation() {
+        // Full 3D mounting (calibrated in the panel): heading, pitch and roll of the VEHICLE from the sensor's raw yaw/pitch/roll.
+        // The settings are written by the web thread, so work on a copy and skip a frame whose copy is inconsistent (a torn read).
+        const ImuMount::Mount k = IMU_MOUNT3D;
+        if (k.valid) {
+            if (!ImuMount::mountOk(k)) return;
+            float h, p3, r3;
+            ImuMount::apply(k, rawYawDeg, rawPitchDeg, rawRollDeg, h, p3, r3);
+            h += IMU_MOUNTING_OFFSET_DEG;
+            while (h < -180.0f) h += 360.0f;
+            while (h > 180.0f) h -= 360.0f;
+            headingDeg = h;
+            pitchDeg = p3;
+            rollDeg = IMU_ROLL_INVERT ? -r3 : r3;
+            return;
+        }
         float r = rawRollDeg, p = rawPitchDeg;
         if (IMU_MOUNT_ROTATION_DEG != 0.0f) {
             float psi = IMU_MOUNT_ROTATION_DEG * (float)M_PI / 180.0f;
@@ -262,7 +278,7 @@ public:
             float deg = heading.yaw + IMU_MOUNTING_OFFSET_DEG;
             while (deg < -180.0f) deg += 360.0f;
             while (deg > 180.0f) deg -= 360.0f;
-            headingDeg = deg;
+            if (!IMU_MOUNT3D.valid) headingDeg = deg;   // with the 3D mounting applyMountRotation() computes the vehicle heading
             rawPitchDeg = heading.pitch;
             rawRollDeg = heading.roll;
             // Accelerations (m/s^2) - available in the UART-RVC structure next to
@@ -381,6 +397,7 @@ public:
     static float getRollDeg() { return rollDeg; }          // AFTER the rotation correction - this goes to AgOpenWeb
     static float getRawRollDeg() { return rawRollDeg; }    // raw from the sensor (for calibration)
     static float getRawPitchDeg() { return rawPitchDeg; }
+    static bool isMount3dActive() { return IMU_MOUNT3D.valid; }
     static float getAccelX() { return accelX; }
     static float getAccelY() { return accelY; }
     static float getAccelZ() { return accelZ; }

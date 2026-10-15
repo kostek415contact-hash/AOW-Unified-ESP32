@@ -142,6 +142,15 @@ public:
         IMU_MOUNTING_OFFSET_DEG = prefs.getFloat("imuOffset", IMU_MOUNTING_OFFSET_DEG);
         IMU_MOUNT_ROTATION_DEG = prefs.getFloat("imuRot", IMU_MOUNT_ROTATION_DEG);
         IMU_ROLL_INVERT = prefs.getBool("imuRollInv", IMU_ROLL_INVERT);
+        {   // 3D mounting: stored as its text form (sensors/imu_mount.h), checked on load
+            const String txt = prefs.getString("imuM3d", "");
+            ImuMount::Mount mm;
+            if (ImuMount::parse(txt.c_str(), mm)) IMU_MOUNT3D = mm;
+            else {
+                LogBuffer::println("[SETTINGS] WARNING: the saved IMU 3D mounting is invalid - switched off.");
+                IMU_MOUNT3D = ImuMount::Mount(); prefs.remove("imuM3d");
+            }
+        }
         STEERING_ANGLE_RIGHT_DEG = prefs.getFloat("steerRightDeg", STEERING_ANGLE_RIGHT_DEG);
 
         DEBUG_STEP_TIMING = prefs.getBool("dStepTiming", DEBUG_STEP_TIMING);
@@ -428,6 +437,21 @@ public:
                                                               prefs.putFloat("imuRot", rotDeg);
                                                               if (rollInvert >= 0) { IMU_ROLL_INVERT = (rollInvert != 0); prefs.putBool("imuRollInv", IMU_ROLL_INVERT); }
                                                               LogBuffer::printf("[SETTINGS] IMU board rotation saved: %.1f deg.\n", rotDeg);
+                                                          }
+
+                                                          // 3D mounting (sensors/imu_mount.h). Works immediately. An invalid mount = off.
+                                                          static void saveImuMount3d(const ImuMount::Mount& m) {
+                                                              if (m.valid && ImuMount::mountOk(m)) {
+                                                                  char buf[160];
+                                                                  ImuMount::format(m, buf, sizeof(buf));
+                                                                  prefs.putString("imuM3d", buf);
+                                                                  IMU_MOUNT3D = m;
+                                                                  LogBuffer::println("[SETTINGS] IMU 3D mounting saved.");
+                                                              } else {
+                                                                  prefs.remove("imuM3d");
+                                                                  IMU_MOUNT3D = ImuMount::Mount();
+                                                                  LogBuffer::println("[SETTINGS] IMU 3D mounting switched off.");
+                                                              }
                                                           }
 
                                                           // Panel protection (PIN / password / none). Validation and authorization - in the handler (web_server.h).

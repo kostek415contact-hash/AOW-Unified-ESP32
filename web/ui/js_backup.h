@@ -31,6 +31,8 @@ const BK_GROUPS=[
    keys:{steerLeftDeg:'n',steerRightDeg:'n'},params:o=>({leftDeg:String(o.steerLeftDeg),rightDeg:String(o.steerRightDeg)})},
   {id:'imu',name:TL('imu_board_rotation'),url:'/settings_save_imu_rotation',
    keys:{imuRotDeg:'n',imuRollInvert:'b'},optional:['imuRollInvert'],params:o=>({rotDeg:String(o.imuRotDeg),rollInvert:o.imuRollInvert?'1':'0'})},
+  {id:'imu3d',name:TL('imu_3d_mounting'),url:'/settings_save_imu_mount3d',
+   keys:{imuMount3d:'s'},optional:['imuMount3d'],params:o=>({m:o.imuMount3d})},
   {id:'eth',name:TL('ethernet_w5500'),url:'/settings_save_ethernet',
    keys:{enEthernet:'b'},optional:['enEthernet'],params:o=>({enEthernet:o.enEthernet?'1':'0'})},
   {id:'engage',name:TL('steering_engage_detection'),url:'/settings_save_agio_engage',
@@ -60,7 +62,7 @@ function backupPlan(obj,st){
     const cur=backupBuild(st),opt=g.optional||[],bad=[],diff=[];
     for(const k in g.keys){
       const t=g.keys[k],v=set[k];
-      const okType=t==='s'?typeof v==='string'&&v.length<=64&&!/[\u0000-\u001f]/.test(v):t==='b'?typeof v==='boolean':typeof v==='number'&&isFinite(v);
+      const okType=t==='s'?typeof v==='string'&&v.length<=128&&!/[\u0000-\u001f]/.test(v):t==='b'?typeof v==='boolean':typeof v==='number'&&isFinite(v);
       if(!okType){if(v===undefined&&opt.includes(k)&&cur[k]!==undefined){continue;}bad.push(k);continue;}
       if(g.allowed&&g.allowed[k]&&!g.allowed[k].includes(v)){bad.push(k);continue;}
       if(cur[k]!==undefined&&cur[k]!==v)diff.push(k);
@@ -168,115 +170,20 @@ function updSenders(s){
 }
 /* Settings page: titled sections (jump chips on top), cards in a plain grid in the order you read them, long explanations folded under "Details". */
 const SETSEC=[];
-// A settings section is a box with a title (tap = fold / unfold), a short description and a grid of cards. Only the first one starts
-// open; the choice is remembered in this browser (aog.shut, key set:<id>: 1 = shut, 0 = open).
-function setSecToggle(box,open,save){
-  box.classList.toggle('shut',!open);
-  const h=box.firstChild;h.setAttribute('aria-expanded',open?'true':'false');
-  if(save&&box.dataset.sid){const o=shutLoad();o['set:'+box.dataset.sid]=open?0:1;shutSave(o);}
-}
 function setSection(root,id,title,desc){
-  const box=el('section','secbox'),h=el('h2','sech',title);h.id='sec-'+id;box.dataset.sid=id;
-  h.tabIndex=0;h.setAttribute('role','button');
-  h.onclick=()=>setSecToggle(box,box.classList.contains('shut'),true);
-  h.onkeydown=e=>{if(e.key==='Enter'||e.key===' '){e.preventDefault();h.onclick();}};
-  box.appendChild(h);
-  if(desc)box.appendChild(el('p','secd',desc));
-  const grid=el('div','setsec');box.appendChild(grid);root.appendChild(box);
-  const v=shutLoad()['set:'+id];
-  setSecToggle(box,v===undefined?SETSEC.length===0:v===0,false);
+  const h=el('h2','sech',title);h.id='sec-'+id;
+  root.appendChild(h);
+  if(desc)root.appendChild(el('p','secd',desc));
+  const grid=el('div','setsec');root.appendChild(grid);
   SETSEC.push([id,title]);
   return grid;
 }
-/* Search bar above the sections: filters the cards by their text (titles, labels, hints, placeholders); matching sections open,
-   the rest hide. Clearing it restores the folded / open state from before the search. Two buttons fold / unfold all sections. */
-/* "Recently edited": the last few settings cards the user changed an input in (this browser only); a button jumps to the card. */
-const RECENT_KEY='aog.recent';
-function recentLoad(){try{const a=JSON.parse(localStorage.getItem(RECENT_KEY)||'[]');return Array.isArray(a)?a:[];}catch(e){return [];}}
-function setRecent(root,nav){
-  const bar=el('div','recent');
-  const draw=()=>{
-    bar.textContent='';const list=recentLoad().filter(r=>r&&r.s&&r.t);bar.hidden=!list.length;if(!list.length)return;
-    bar.appendChild(el('span','rl',TL('recent_settings')));
-    list.forEach(r=>{const b=el('button','pill',r.t);b.type='button';b.onclick=()=>{
-      const h=document.getElementById('sec-'+r.s);if(!h)return;setSecToggle(h.parentNode,true,true);
-      const c=[...h.parentNode.querySelectorAll('.setsec > .card')].find(x=>{const t=x.querySelector('h3');return t&&t.textContent===r.t;});
-      const tg=c||h;tg.scrollIntoView({behavior:'smooth',block:'start'});if(c){c.classList.remove('flash');void c.offsetWidth;c.classList.add('flash');}};bar.appendChild(b);});
-  };
-  root.addEventListener('change',e=>{
-    const c=e.target.closest&&e.target.closest('.setsec > .card');if(!c)return;const h3=c.querySelector('h3'),box=c.closest('.secbox');
-    if(!h3||!box||e.target.type==='search')return;
-    const t=h3.textContent,s=box.dataset.sid;
-    const a=recentLoad().filter(r=>!(r&&r.s===s&&r.t===t));a.unshift({s,t});
-    try{localStorage.setItem(RECENT_KEY,JSON.stringify(a.slice(0,5)));}catch(x){}
-    draw();
-  });
-  root.insertBefore(bar,nav);draw();
-  return bar;
-}
-function setSearchBar(root,nav,rec){
-  const bar=el('div','setbar'),inp=document.createElement('input');
-  inp.type='search';inp.placeholder=TL('search_settings');inp.setAttribute('aria-label',TL('search_settings'));inp.autocomplete='off';
-  const none=el('div','nomatch',TL('no_settings_found'));none.hidden=true;
-  const boxes=()=>[...root.querySelectorAll('.secbox')];
-  let before=null;
-  const textOf=c=>(c.textContent+' '+[...c.querySelectorAll('input,select,textarea')].map(i=>(i.placeholder||'')+' '+(i.getAttribute('aria-label')||'')).join(' ')).toLowerCase();
-  const run=()=>{
-    const q=inp.value.trim().toLowerCase();
-    if(!q){
-      if(before){boxes().forEach((b,i)=>{b.hidden=false;setSecToggle(b,!before[i],false);});before=null;}
-      root.querySelectorAll('.setsec > .card').forEach(c=>{c.hidden=false;});
-      nav.hidden=false;if(rec)rec.hidden=!recentLoad().length;none.hidden=true;return;
-    }
-    if(!before)before=boxes().map(b=>b.classList.contains('shut'));
-    nav.hidden=true;if(rec)rec.hidden=true;let any=false;
-    boxes().forEach(b=>{
-      let hit=0;
-      b.querySelectorAll('.setsec > .card').forEach(c=>{const m=textOf(c).indexOf(q)>=0;c.hidden=!m;if(m)hit++;});
-      b.hidden=!hit;if(hit){any=true;setSecToggle(b,true,false);}
-    });
-    none.hidden=any;
-  };
-  inp.oninput=run;
-  inp.onkeydown=e=>{if(e.key==='Escape'){inp.value='';run();}};
-  const mk=(txt,open)=>{const b=el('button','pill',txt);b.type='button';
-    b.onclick=()=>{if(inp.value){inp.value='';run();}boxes().forEach(x=>setSecToggle(x,open,true));};return b;};
-  bar.append(inp,mk(TL('collapse_all'),false),mk(TL('expand_all'),true));
-  root.insertBefore(bar,rec||nav);root.appendChild(none);
-  return run;
-}
-/* Long explanations fold under "Details" (a tap opens them). Status messages and warnings (bad / warn classes, hidden ones) stay visible. */
 function foldLong(root){
-  root.querySelectorAll('.note,.hint,.secd,ol.steps').forEach(p=>{
-    if(p.hidden||p.id==='restartHint'||p.id==='featHint'||p.closest('details')||p.textContent.length<100||/\b(bad|warn|ok|active)\b/.test(p.className))return;
+  root.querySelectorAll('.note,.secd,ol.steps').forEach(p=>{
+    if(p.hidden||p.id==='restartHint'||p.closest('details')||p.textContent.length<140)return;
     const d=el('details','fold'),sm=el('summary','',TL('show_details'));
     p.replaceWith(d);d.append(sm,p);
   });
-}
-/* Cards fold by tapping their title (the chevron on the right); the choice is remembered in this browser. Two small buttons above the
-   grid fold / unfold all of them. Diagnostics cards keep their on/off switch visible when folded. */
-const SHUT_KEY='aog.shut';
-function shutLoad(){try{return JSON.parse(localStorage.getItem(SHUT_KEY)||'{}')||{};}catch(e){return {};}}
-function shutSave(o){try{localStorage.setItem(SHUT_KEY,JSON.stringify(o));}catch(e){}}
-function cardFolding(grid){
-  const sid=grid.id,cards=()=>[...grid.querySelectorAll('.card')].filter(c=>c.querySelector('h3'));
-  const keyOf=c=>sid+':'+c.querySelector('h3').dataset.k;
-  const apply=(c,shut,save)=>{
-    c.classList.toggle('shut',shut);c.querySelector('h3').setAttribute('aria-expanded',shut?'false':'true');
-    if(save){const o=shutLoad();if(shut)o[keyOf(c)]=1;else delete o[keyOf(c)];shutSave(o);}
-  };
-  const st=shutLoad();
-  cards().forEach(c=>{
-    const h=c.querySelector('h3');h.dataset.k=h.textContent;h.classList.add('fh');h.tabIndex=0;h.setAttribute('role','button');
-    const t=()=>apply(c,!c.classList.contains('shut'),true);
-    h.onclick=t;h.onkeydown=e=>{if(e.key==='Enter'||e.key===' '){e.preventDefault();t();}};
-    apply(c,!!st[keyOf(c)],false);
-  });
-  const bar=el('div','foldbar'),mk=(txt,shut)=>{const b=el('button','pill',txt);b.type='button';
-    b.onclick=()=>{const o=shutLoad();cards().forEach(c=>{c.classList.toggle('shut',shut);c.querySelector('h3').setAttribute('aria-expanded',shut?'false':'true');
-      if(shut)o[keyOf(c)]=1;else delete o[keyOf(c)];});shutSave(o);};return b;};
-  bar.append(mk(TL('collapse_all'),true),mk(TL('expand_all'),false));
-  grid.parentNode.insertBefore(bar,grid);
 }
 function buildSet(){
   const root=$('#setGrid'),wifiCards=[];
@@ -367,10 +274,8 @@ function buildSet(){
   btns(c,[[TL('restart'),'',restart],[TL('ota_update'),'',()=>{location.href='/update';}],[TL('restore_everything_to_defaults'),'danger',factoryReset]]);
   gM.appendChild(c);
   // jump chips on top + folding of the long explanations
-  SETSEC.forEach(([id,t])=>{const b=el('button','pill',t);b.onclick=()=>{const h=document.getElementById('sec-'+id);if(!h)return;setSecToggle(h.parentNode,true,true);h.scrollIntoView({behavior:'smooth',block:'start'});};nav.appendChild(b);});
+  SETSEC.forEach(([id,t])=>{const b=el('button','pill',t);b.onclick=()=>{const h=document.getElementById('sec-'+id);if(h)h.scrollIntoView({behavior:'smooth',block:'start'});};nav.appendChild(b);});
   foldLong(root);
-  const rec=setRecent(root,nav);
-  setSearchBar(root,nav,rec);
 }
 let settingsFilled=false;
 function fillSettings(s,force){
