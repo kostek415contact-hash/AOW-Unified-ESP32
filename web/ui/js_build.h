@@ -266,11 +266,16 @@ function buildCal(){
    '<div class="result" id="imuRes">'+TL('no_point_stored_yet')+'</div>'+
    '<label class="field"><span>'+TL('imu_tilt_type')+'</span><select id="imuTilt"><option value="0">'+TL('imu_tilt_side_right_down')+'</option><option value="1">'+TL('imu_tilt_nose_up')+'</option></select></label>'+
    '<div class="btns"><button class="btn primary" id="imu3d">'+TL('save_3d_mounting')+'</button><button class="btn" id="imu3dOff">'+TL('switch_3d_mounting_off')+'</button></div>'+
+   '<p class="note">'+TL('imu_manual_angles_hint')+'</p>'+
+   '<label class="field"><span>'+TL('imu_board_yaw_deg')+'</span><input id="setImuBy" type="number" step="0.1" min="-180" max="180"></label>'+
+   '<label class="field"><span>'+TL('imu_board_pitch_deg')+'</span><input id="setImuBp" type="number" step="0.1" min="-90" max="90"></label>'+
+   '<label class="field"><span>'+TL('imu_board_roll_deg')+'</span><input id="setImuBr" type="number" step="0.1" min="-180" max="180"></label>'+
+   '<div class="btns"><button class="btn" id="imuAng">'+TL('save_board_angles')+'</button></div>'+
    '<label class="field"><span>'+TL('board_rotation_degrees')+'</span><input id="setImuRot" type="number" step="0.1"></label>'+
    '<div class="btns"><button class="btn primary" id="imuSave">'+TL('save')+'</button></div>';
   b.insertBefore(sw('setImuRollInvert',TL('invert_roll_sign')),b.lastElementChild);
   g.appendChild(b);
-  INP.setSteerLeftDeg=$('#setSteerLeftDeg');INP.setSteerRightDeg=$('#setSteerRightDeg');INP.setImuRot=$('#setImuRot');
+  INP.setSteerLeftDeg=$('#setSteerLeftDeg');INP.setSteerRightDeg=$('#setSteerRightDeg');INP.setImuRot=$('#setImuRot');INP.setImuBy=$('#setImuBy');INP.setImuBp=$('#setImuBp');INP.setImuBr=$('#setImuBr');
   // motor current sensor (ACS71240)
   const cc=document.createElement('article');cc.className='card';cc.id='curCard';
   cc.innerHTML='<h3>'+TL('motor_current_sensor_acs71240_30_a')+'</h3><div class="big" id="curAmps">—</div><div class="bigs" id="curState">—</div>'+
@@ -382,6 +387,11 @@ function buildCal(){
     const q=(P,k)=>String(P[k]);
     await post('/imu_mount_solve',{aPitch:q(A,'p'),aRoll:q(A,'r'),aAx:q(A,'ax'),aAy:q(A,'ay'),aAz:q(A,'az'),
       bPitch:q(B,'p'),bRoll:q(B,'r'),bAx:q(B,'ax'),bAy:q(B,'ay'),bAz:q(B,'az'),kind:$('#imuTilt').value},TL('imu_3d_mounting_saved'));});
+  act('#imuAng',async()=>{
+    const y=parseFloat(INP.setImuBy.value),p=parseFloat(INP.setImuBp.value),r=parseFloat(INP.setImuBr.value);
+    if(![y,p,r].every(isFinite)||Math.abs(y)>180||Math.abs(p)>90||Math.abs(r)>180){toast(TL('imu_board_angles_range'),'bad');return;}
+    if(!(await askConfirm(TL('confirm_save_imu_mount3d'))))return;
+    await post('/settings_save_imu_mount3d_angles',{yaw:y,pitch:p,roll:r},TL('imu_3d_mounting_saved'));});
   act('#imu3dOff',async()=>{if(!(await askConfirm(TL('confirm_imu_mount3d_off'))))return;
     await post('/settings_save_imu_mount3d',{m:''},TL('imu_3d_mounting_switched_off'));});
   act('#imuSave',async()=>{const v=parseFloat($('#setImuRot').value);if(!isFinite(v)||Math.abs(v)>180){toast(TL('enter_a_number_in_the_range_180_180'),'bad');return;}

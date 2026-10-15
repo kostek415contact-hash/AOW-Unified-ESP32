@@ -265,6 +265,33 @@ int main() {
         CHECK(checked >= 20 && good == checked);
     }
 
+    // ----- 7c. angles typed by hand give the same mount as the calibration, and round-trip through boardAngles -----
+    {
+        int checked = 0, same = 0;
+        const double mounts[][3] = {{90, 45, 0}, {30, 40, 20}, {-20, 35, 100}, {60, -30, 15}, {0, 45, 0}, {45, 0, 0}};
+        for (const auto& mt : mounts) for (int sp = -1; sp <= 1; sp += 2) for (int sr = -1; sr <= 1; sr += 2) {
+            Rig g{mt[0], mt[1], mt[2], sp, sr, 1, -20.0};
+            const Reading A = sense(g, vehicle(10, 0, 0)), B = sense(g, vehicle(10, 0, 12));
+            Mount solved, manual;
+            if (solve(poseOf(A), poseOf(B), Tilt::SIDE_RIGHT_DOWN, solved) != Result::OK) continue;
+            checked++;
+            if (!fromBoardAngles((float)mt[2], (float)mt[1], (float)mt[0], solved.sp, solved.sr, solved.sa, manual)) continue;
+            bool eq = true;
+            for (int i = 0; i < 9; i++) if (std::fabs(manual.m[i] - solved.m[i]) > 2e-3f) eq = false;
+            if (eq) same++;
+        }
+        CHECK(checked >= 12 && same == checked);
+        float y, p, r; Mount k;
+        CHECK(fromBoardAngles(20, 45, -30, 1, 1, 1, k) && k.valid);
+        boardAngles(k, y, p, r);
+        CHECK(std::fabs(y - 20) < 0.01f && std::fabs(p - 45) < 0.01f && std::fabs(r + 30) < 0.01f);
+        CHECK(!fromBoardAngles(0, 80, 0, 1, 1, 1, k) && !k.valid);          // too close to standing on its edge
+        CHECK(!fromBoardAngles(200, 10, 0, 1, 1, 1, k));                    // out of range
+        CHECK(!fromBoardAngles(0, 100, 0, 1, 1, 1, k));
+        CHECK(!fromBoardAngles(NAN, 10, 0, 1, 1, 1, k));
+        CHECK(!fromBoardAngles(0, 10, 0, 0, 1, 1, k));                      // a sign must be +-1
+    }
+
     // ----- 8. mountOk rejects broken matrices -----
     {
         Mount k; k.valid = true;

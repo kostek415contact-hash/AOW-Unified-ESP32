@@ -519,7 +519,7 @@ static const char WEB_LANG_EN[] PROGMEM = R"LANG(window.AOG_CAT=window.AOG_CAT||
   "point_a_level": "Point A: level",
   "point_b_tilted": "Point B: tilted",
   "no_point_stored_yet": "No point stored yet.",
-  "board_rotation_degrees": "Board rotation (degrees)",
+  "board_rotation_degrees": "Board rotation around the vertical axis, flat board only (degrees)",
   "motor_current_sensor_acs71240_30_a": "Motor current sensor (ACS71240, ±30 A)",
   "connect_the_sensor_to_input_a1_of_the": "Connect the sensor to input <b>A1</b> of the ADS1115 and power it from <b>3.3 V</b> (not from 5 V — it would damage the ADS).",
   "with_the_motor_and_steering_off_press_zero": "With the motor and steering <b>off</b>, press “Zero” — the module averages for about 1–2 s.",
@@ -586,6 +586,12 @@ static const char WEB_LANG_EN[] PROGMEM = R"LANG(window.AOG_CAT=window.AOG_CAT||
   "confirm_save_imu_mount3d": "Save the 3D mounting? It replaces the board rotation and changes the heading, roll and pitch sent to AgOpenWeb at once.",
   "confirm_imu_mount3d_off": "Switch the 3D mounting off? The plain board rotation is used again.",
   "imu_3d_mounting_saved": "3D mounting saved",
+  "imu_manual_angles_hint": "Or type the board's angles in the vehicle by hand (the calibration above fills them in). Without a calibration the sign convention of the sensor is assumed; if roll or pitch go the wrong way, use the calibration instead.",
+  "imu_board_yaw_deg": "Board yaw in the vehicle (degrees)",
+  "imu_board_pitch_deg": "Board pitch in the vehicle (degrees)",
+  "imu_board_roll_deg": "Board roll in the vehicle (degrees)",
+  "save_board_angles": "Save board angles",
+  "imu_board_angles_range": "Enter numbers: yaw and roll -180…180, pitch -90…90",
   "imu_board_angles": "Board in the vehicle: yaw / pitch / roll (3D)",
   "imu_point_values": "Point {n}: roll {r}°, pitch {p}°, acceleration {a} m/s²",
   "imu_points_tilt": "Tilt between A and B: {t}° (3° at least, 10–15° for a reliable result)",
@@ -1325,5 +1331,6 @@ static const char WEB_LANG_EN[] PROGMEM = R"LANG(window.AOG_CAT=window.AOG_CAT||
   "msg_imu_mount_04": "IMU mount: tilt too small - tilt the vehicle by at least 3 degrees",
   "msg_imu_mount_05": "IMU mount: could not tell the sensor's angle convention - tilt the vehicle sideways (right side down) instead of nose up, or the board lies nearly flat (use the board rotation), or the readings are noisy",
   "msg_imu_mount_06": "IMU mount: error",
-  "msg_server_37": "Required fields missing or invalid"
+  "msg_server_37": "Required fields missing or invalid",
+  "msg_server_39": "IMU mount: the angles are out of range or the board would stand too close to its edge (pitch above 75 deg)"
 };)LANG";

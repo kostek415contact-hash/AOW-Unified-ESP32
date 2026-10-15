@@ -392,7 +392,7 @@ function fillSettings(s,force){
   set('setNtripUser',s.ntripUser);applyPwState(s);
   ['enSection','enMotor','enCurrent','enImu','enLed'].forEach(k=>INP[k].checked=!!s[k]);if(INP.enEthernet)INP.enEthernet.checked=!!s.enEthernet;
   set('setEthGrace',s.ethGraceMs);set('setWifiTimeout',s.wifiTimeoutMs);set('setWatchdogS',s.watchdogS);set('setLedBrightness',s.ledBrightness);
-  set('setSteerLeftDeg',s.steerLeftDeg);set('setSteerRightDeg',s.steerRightDeg);set('setImuRot',s.imuRotDeg);if(INP.setImuRollInvert)INP.setImuRollInvert.checked=!!s.imuRollInvert;
+  set('setSteerLeftDeg',s.steerLeftDeg);set('setSteerRightDeg',s.steerRightDeg);set('setImuRot',s.imuRotDeg);set('setImuBy',s.imuMountYaw);set('setImuBp',s.imuMountPitch);set('setImuBr',s.imuMountRoll);if(INP.setImuRollInvert)INP.setImuRollInvert.checked=!!s.imuRollInvert;
 }
 function syncActiveWifiBadge(s){
   for(let i=1;i<=4;i++){

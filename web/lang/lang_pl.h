@@ -519,7 +519,7 @@ static const char WEB_LANG_PL[] PROGMEM = R"LANG(window.AOG_CAT=window.AOG_CAT||
   "point_a_level": "Punkt A: poziomo",
   "point_b_tilted": "Punkt B: przechył",
   "no_point_stored_yet": "Nie zapamiętano jeszcze żadnego punktu.",
-  "board_rotation_degrees": "Obrót płytki (stopnie)",
+  "board_rotation_degrees": "Obrót płytki wokół pionu, tylko płytka leżąca płasko (stopnie)",
   "motor_current_sensor_acs71240_30_a": "Czujnik prądu silnika (ACS71240, ±30 A)",
   "connect_the_sensor_to_input_a1_of_the": "Czujnik podłącz do wejścia <b>A1</b> ADS1115 i zasilaj z <b>3,3 V</b> (nie z 5 V — uszkodzi ADS).",
   "with_the_motor_and_steering_off_press_zero": "Przy <b>wyłączonym</b> silniku i prowadzeniu naciśnij „Zeruj” — moduł uśrednia ok. 1–2 s.",
@@ -586,6 +586,12 @@ static const char WEB_LANG_PL[] PROGMEM = R"LANG(window.AOG_CAT=window.AOG_CAT||
   "confirm_save_imu_mount3d": "Zapisać montaż 3D? Zastępuje obrót płytki i od razu zmienia kurs, przechył i pochylenie wysyłane do AgOpenWeb.",
   "confirm_imu_mount3d_off": "Wyłączyć montaż 3D? Znowu działa zwykły obrót płytki.",
   "imu_3d_mounting_saved": "Zapisano montaż 3D",
+  "imu_manual_angles_hint": "Albo wpisz ręcznie kąty płytki w pojeździe (kalibracja powyżej sama je wypełnia). Bez kalibracji zakładana jest standardowa konwencja znaków czujnika; jeśli roll lub pitch idą w złą stronę, użyj kalibracji.",
+  "imu_board_yaw_deg": "Yaw płytki w pojeździe (stopnie)",
+  "imu_board_pitch_deg": "Pitch płytki w pojeździe (stopnie)",
+  "imu_board_roll_deg": "Roll płytki w pojeździe (stopnie)",
+  "save_board_angles": "Zapisz kąty płytki",
+  "imu_board_angles_range": "Wpisz liczby: yaw i roll -180…180, pitch -90…90",
   "imu_board_angles": "Płytka w pojeździe: yaw / pitch / roll (3D)",
   "imu_point_values": "Punkt {n}: roll {r}°, pitch {p}°, przyspieszenie {a} m/s²",
   "imu_points_tilt": "Przechył między A i B: {t}° (minimum 3°, pewny wynik przy 10–15°)",
@@ -1325,5 +1331,6 @@ static const char WEB_LANG_PL[] PROGMEM = R"LANG(window.AOG_CAT=window.AOG_CAT||
   "msg_imu_mount_04": "Montaż IMU: zbyt mały przechył - przechyl pojazd o co najmniej 3 stopnie",
   "msg_imu_mount_05": "Montaż IMU: nie udało się ustalić konwencji kątów czujnika - przechyl pojazd na bok (prawa strona w dół) zamiast nosem w górę, albo płytka leży niemal płasko (użyj obrotu płytki), albo odczyty są zaszumione",
   "msg_imu_mount_06": "Montaż IMU: błąd",
-  "msg_server_37": "Brak wymaganych pól lub nieprawidłowe wartości"
+  "msg_server_37": "Brak wymaganych pól lub nieprawidłowe wartości",
+  "msg_server_39": "Montaż IMU: kąty poza zakresem albo płytka stałaby zbyt blisko na krawędzi (pitch powyżej 75 st.)"
 };)LANG";
