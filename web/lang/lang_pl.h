@@ -569,6 +569,12 @@ static const char WEB_LANG_PL[] PROGMEM = R"LANG(window.AOG_CAT=window.AOG_CAT||
   "imu_3d_mounting": "Kalibracja montażu IMU",
   "imu_mount_on": "wykonana",
   "imu_mount_off": "brak",
+  "imu_manual_angles_hint": "Kąty płytki w pojeździe. Kalibracja sama je wypełnia; wpisz je ręcznie, by ustawić montaż (np. po przeniesieniu modułu do innego ciągnika) i naciśnij „Zapisz kalibrację”.",
+  "imu_board_yaw_deg": "Yaw płytki w pojeździe (stopnie)",
+  "imu_board_pitch_deg": "Pitch płytki w pojeździe (stopnie)",
+  "imu_board_roll_deg": "Roll płytki w pojeździe (stopnie)",
+  "imu_board_angles_range": "Wpisz liczby: yaw i roll -180…180, pitch -90…90",
+  "imu_board_angles": "Płytka w pojeździe: yaw / pitch / roll",
   "store_points_a_and_b_first": "Najpierw zapamiętaj punkt A i punkt B.",
   "confirm_save_imu_mount3d": "Zapisać kalibrację? Od razu zmienia kurs, przechył i pochylenie wysyłane do AgOpenWeb.",
   "confirm_imu_mount3d_off": "Zresetować kalibrację? Roll, pitch i kurs będą wysyłane tak, jak mierzy czujnik.",
@@ -1315,5 +1321,6 @@ static const char WEB_LANG_PL[] PROGMEM = R"LANG(window.AOG_CAT=window.AOG_CAT||
   "msg_imu_mount_04": "Montaż IMU: zbyt mały przechył - przechyl pojazd o co najmniej 3 stopnie",
   "msg_imu_mount_05": "Montaż IMU: nie udało się ustalić konwencji kątów czujnika - przechyl pojazd na bok (prawa strona w dół) zamiast nosem w górę, albo płytka leży niemal płasko (użyj obrotu płytki), albo odczyty są zaszumione",
   "msg_imu_mount_06": "Montaż IMU: błąd",
-  "msg_server_37": "Brak wymaganych pól lub nieprawidłowe wartości"
+  "msg_server_37": "Brak wymaganych pól lub nieprawidłowe wartości",
+  "msg_server_39": "Montaż IMU: kąty poza zakresem albo płytka stałaby zbyt blisko na krawędzi (pitch powyżej 75 st.)"
 };)LANG";

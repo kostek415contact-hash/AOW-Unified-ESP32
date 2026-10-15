@@ -113,7 +113,7 @@ the enclosure (e.g. an enclosure on the cab wall with the board at 45°):
 3. **Save calibration.** The card shows the values of both points and the tilt between them. The module finds all the angles of the board
    by itself and learns the sign convention of the sensor's angles from its gravity reading; it refuses with a reason when it cannot
    (tilt under 3°, board standing almost on its edge, readings not steady). A board that lies flat only needs a turn around the vertical
-   axis, which is saved the same way. **Reset calibration** sends roll, pitch and heading as the sensor measures them. If AgOpenWeb shows the
+   axis, which is saved the same way. The card also shows the board's yaw / pitch / roll in the vehicle; they can be typed by hand and saved with **Save calibration** (without points A/B), e.g. to copy the mounting to another tractor. **Reset calibration** sends roll, pitch and heading as the sensor measures them. If AgOpenWeb shows the
    roll the wrong way round, switch **Invert roll sign**. The calibration is included in the settings backup.
 
 **Motor current sensor:** with the motor off and steering disengaged press **Zero** (about 1-2 s of averaging). Then set the

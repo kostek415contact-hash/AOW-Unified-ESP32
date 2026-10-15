@@ -114,7 +114,7 @@ panel odpowie „Prowadzenie jest włączone” - więc najpierw wyłącz prowad
 3. **Zapisz kalibrację.** Karta pokazuje wartości obu punktów i przechył między nimi. Moduł sam znajduje wszystkie kąty płytki i z odczytu
    grawitacji uczy się konwencji znaków kątów czujnika; gdy się nie da, odmawia z podaniem powodu (przechył poniżej 3°, płytka stoi
    niemal na krawędzi, odczyty nie są stabilne). Płytka leżąca płasko wymaga tylko obrotu wokół pionu, który zapisuje się tak samo.
-   **Resetuj kalibrację** wysyła roll, pitch i kurs tak, jak mierzy czujnik. Jeśli AgOpenWeb pokazuje przechył w złą stronę, włącz
+   Karta pokazuje też yaw / pitch / roll płytki w pojeździe; można je wpisać ręcznie i zapisać przyciskiem **Zapisz kalibrację** (bez punktów A/B), np. by przenieść montaż do innego ciągnika. **Resetuj kalibrację** wysyła roll, pitch i kurs tak, jak mierzy czujnik. Jeśli AgOpenWeb pokazuje przechył w złą stronę, włącz
    **Odwróć znak rollu**. Kalibracja jest w kopii zapasowej ustawień.
 
 **Czujnik prądu silnika:** przy wyłączonym silniku i wyłączonym prowadzeniu naciśnij **Zeruj** (uśrednianie ok. 1-2 s).

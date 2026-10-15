@@ -569,6 +569,12 @@ static const char WEB_LANG_EN[] PROGMEM = R"LANG(window.AOG_CAT=window.AOG_CAT||
   "imu_3d_mounting": "IMU mounting calibration",
   "imu_mount_on": "done",
   "imu_mount_off": "none",
+  "imu_manual_angles_hint": "Board angles in the vehicle. The calibration fills them in; type them to set the mounting by hand (e.g. after moving the module to another tractor) and press “Save calibration”.",
+  "imu_board_yaw_deg": "Board yaw in the vehicle (degrees)",
+  "imu_board_pitch_deg": "Board pitch in the vehicle (degrees)",
+  "imu_board_roll_deg": "Board roll in the vehicle (degrees)",
+  "imu_board_angles_range": "Enter numbers: yaw and roll -180…180, pitch -90…90",
+  "imu_board_angles": "Board in the vehicle: yaw / pitch / roll",
   "store_points_a_and_b_first": "Store point A and point B first.",
   "confirm_save_imu_mount3d": "Save the calibration? It changes the heading, roll and pitch sent to AgOpenWeb at once.",
   "confirm_imu_mount3d_off": "Reset the calibration? Roll, pitch and heading are then sent as the sensor measures them.",
@@ -1315,5 +1321,6 @@ static const char WEB_LANG_EN[] PROGMEM = R"LANG(window.AOG_CAT=window.AOG_CAT||
   "msg_imu_mount_04": "IMU mount: tilt too small - tilt the vehicle by at least 3 degrees",
   "msg_imu_mount_05": "IMU mount: could not tell the sensor's angle convention - tilt the vehicle sideways (right side down) instead of nose up, or the board lies nearly flat (use the board rotation), or the readings are noisy",
   "msg_imu_mount_06": "IMU mount: error",
-  "msg_server_37": "Required fields missing or invalid"
+  "msg_server_37": "Required fields missing or invalid",
+  "msg_server_39": "IMU mount: the angles are out of range or the board would stand too close to its edge (pitch above 75 deg)"
 };)LANG";

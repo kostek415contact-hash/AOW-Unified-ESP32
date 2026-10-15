@@ -263,10 +263,14 @@ function buildCal(){
    '<ol class="steps"><li>'+TL('after_mounting_place_the_enclosure_level')+'</li><li>'+TL('tilt_it_sideways_around_the_axis_along_the')+'</li><li>'+TL('imu_click_save_calibration')+'</li></ol>'+
    '<div class="btns"><button class="btn" id="imuA">'+TL('point_a_level')+'</button><button class="btn" id="imuB">'+TL('point_b_tilted')+'</button></div>'+
    '<div class="result" id="imuRes">'+TL('no_point_stored_yet')+'</div>'+
+   '<p class="note">'+TL('imu_manual_angles_hint')+'</p>'+
+   '<label class="field"><span>'+TL('imu_board_yaw_deg')+'</span><input id="setImuBy" type="number" step="0.1" min="-180" max="180"></label>'+
+   '<label class="field"><span>'+TL('imu_board_pitch_deg')+'</span><input id="setImuBp" type="number" step="0.1" min="-90" max="90"></label>'+
+   '<label class="field"><span>'+TL('imu_board_roll_deg')+'</span><input id="setImuBr" type="number" step="0.1" min="-180" max="180"></label>'+
    '<div class="btns"><button class="btn primary" id="imuSave">'+TL('save_imu_calibration')+'</button><button class="btn" id="imuReset">'+TL('reset_imu_calibration')+'</button></div>';
   b.insertBefore(sw('setImuRollInvert',TL('invert_roll_sign')),b.lastElementChild);
   g.appendChild(b);
-  INP.setSteerLeftDeg=$('#setSteerLeftDeg');INP.setSteerRightDeg=$('#setSteerRightDeg');
+  INP.setSteerLeftDeg=$('#setSteerLeftDeg');INP.setSteerRightDeg=$('#setSteerRightDeg');INP.setImuBy=$('#setImuBy');INP.setImuBp=$('#setImuBp');INP.setImuBr=$('#setImuBr');
   // motor current sensor (ACS71240)
   const cc=document.createElement('article');cc.className='card';cc.id='curCard';
   cc.innerHTML='<h3>'+TL('motor_current_sensor_acs71240_30_a')+'</h3><div class="big" id="curAmps">—</div><div class="bigs" id="curState">—</div>'+
@@ -333,6 +337,7 @@ function buildCal(){
   calCards.imuList=mkRows($('#imuCalRows'),[
    [TL('imu_angles_raw_sensor'),s=>f(s.imuRollRaw,1)+' / '+f(s.imuPitchRaw,1)+' / '+f(s.imuYawRaw,1)+'°'],
    [TL('imu_angles_after_correction'),s=>f(s.imuRoll,1)+' / '+f(s.imuPitch,1)+' / '+f(s.imuHeading,1)+'°'],
+   [TL('imu_board_angles'),s=>isNum(s.imuMountYaw)?f(s.imuMountYaw,1)+' / '+f(s.imuMountPitch,1)+' / '+f(s.imuMountRoll,1)+'°':'—',()=>'ok'],
    [TL('imu_3d_mounting'),s=>(s.imuMount3d||Math.abs(s.imuRotDeg)>0)?TL('imu_mount_on'):TL('imu_mount_off'),()=>'ok']]);
   act('#calL',async()=>{if(await askConfirm(TL('save_this_position_as_an_angle_end_point')))await post('/steering_cal_left',null,TL('left_saved_adc_n',{n:S?S.steerRaw:'?'}));});
   act('#calR',async()=>{if(await askConfirm(TL('save_this_position_as_an_angle_end_point')))await post('/steering_cal_right',null,TL('right_saved_adc_n',{n:S?S.steerRaw:'?'}));});
@@ -370,6 +375,14 @@ function buildCal(){
   // Save: a tilted board (the normal case) gets the full 3D calibration; a board that lies (nearly) flat only needs a turn around the
   // vertical axis, which the module cannot tell apart from the 3D case, so that one is computed here from the two points.
   act('#imuSave',async()=>{
+    if(!A&&!B){   // no points stored: the typed board angles are the calibration (e.g. copied from another tractor)
+      const y=parseFloat(INP.setImuBy.value),p=parseFloat(INP.setImuBp.value),r=parseFloat(INP.setImuBr.value);
+      if(![y,p,r].every(isFinite)||Math.abs(y)>180||Math.abs(p)>90||Math.abs(r)>180){toast(TL('imu_board_angles_range'),'bad');return;}
+      if(!(await askConfirm(TL('confirm_save_imu_mount3d'))))return;
+      if(await post('/settings_save_imu_mount3d_angles',{yaw:y,pitch:p,roll:r},TL('imu_calibration_saved')))
+        await post('/settings_save_imu_rotation',{rotDeg:'0',rollInvert:rollInv()});
+      return;
+    }
     if(!A||!B){toast(TL('store_points_a_and_b_first'),'bad');return;}
     if(!(await askConfirm(TL('confirm_save_imu_mount3d'))))return;
     let ok;
