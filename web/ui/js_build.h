@@ -335,10 +335,8 @@ function buildCal(){
     if(!(await askConfirm(TL('confirm_save_current_thresholds'))))return;
     await post('/settings_save_current',vals({currKickoutA:'setCurKickA',currKickoutMs:'setCurKickMs',currHardA:'setCurHardA'}),TL('current_thresholds_saved'));});
   calCards.imuList=mkRows($('#imuCalRows'),[
-   [TL('roll_pitch_raw_sensor'),s=>f(s.imuRollRaw,1)+' / '+f(s.imuPitchRaw,1)+'°'],
-   [TL('roll_pitch_after_correction_agopenweb'),s=>f(s.imuRoll,1)+' / '+f(s.imuPitch,1)+'°'],
-   [TL('imu_heading_raw_corrected'),s=>f(s.imuYawRaw,1)+' / '+f(s.imuHeading,1)+'°'],
-   [TL('acceleration_x_y_z'),s=>f(s.imuAccelX,2)+' / '+f(s.imuAccelY,2)+' / '+f(s.imuAccelZ,2)+' m/s²'],
+   [TL('imu_angles_raw_sensor'),s=>f(s.imuRollRaw,1)+' / '+f(s.imuPitchRaw,1)+' / '+f(s.imuYawRaw,1)+'°'],
+   [TL('imu_angles_after_correction'),s=>f(s.imuRoll,1)+' / '+f(s.imuPitch,1)+' / '+f(s.imuHeading,1)+'°'],
    [TL('imu_3d_mounting'),s=>s.imuMount3d?TL('imu_mount_on'):TL('imu_mount_off'),()=>'ok'],
    [TL('imu_board_angles'),s=>isNum(s.imuMountYaw)?f(s.imuMountYaw,1)+' / '+f(s.imuMountPitch,1)+' / '+f(s.imuMountRoll,1)+'°':'—',()=>'ok'],
    [TL('saved_board_rotation'),s=>f(s.imuRotDeg,1,'°'),()=>'ok'],
