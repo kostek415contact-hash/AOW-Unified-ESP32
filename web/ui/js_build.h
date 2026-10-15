@@ -15,6 +15,7 @@ function buildRead(){
   [['/hydlift_manual_on','raise'],['/hydlift_manual_off','lower'],['/hydlift_auto','auto_agopenweb']].forEach(([u,k])=>{
     const b=el('button','btn',k==='raise'?TL('raise'):k==='lower'?TL('lower'):TL('auto_agopenweb'));b.dataset.post=u;if(k!=='auto_agopenweb')b.dataset.confirm='1';hb.appendChild(b);});
   hc.appendChild(hb);g.appendChild(hc);cardsRead.push(hc);
+  cardFolding(g);
 }
 function buildDiag(){
   const g=$('#diagGrid');
@@ -37,6 +38,7 @@ function buildDiag(){
     cardsDiag[key]={c,body,off,input,list,extra,d,jf};
     g.appendChild(c);
   });
+  foldLong($('#tab-diag'));
 }
 async function saveFlags(){
   flagPending=true;
@@ -102,14 +104,14 @@ function readiness(s){
   else if(s.ntripEnabled)add(TL('rtk_corrections'),s.ntripStreaming?'ok':'warn',s.ntripStreaming?TL('flowing'):TL('connecting'),'readings');
   else if(s.rtcmSource===2)add(TL('rtk_corrections'),'ok',TL('flowing_via_agopenweb'),'readings');
   else add(TL('rtk_corrections'),'muted',TL('ntrip_off'),'readings');
-  add(TL('angle_sensor'),!s.steerSensorOk?'bad':s.steerCalOk===false?'bad':'ok',!s.steerSensorOk?TL('no_reading'):s.steerCalOk===false?'calibration':f(s.steerAngleDeg,1,'°'),'calibration');
+  add(TL('angle_sensor'),!s.steerSensorOk?'bad':s.steerCalOk===false?'bad':'ok',!s.steerSensorOk?TL('no_reading'):s.steerCalOk===false?TL('calibration_invalid'):f(s.steerAngleDeg,1,'°'),'calibration');
   if(s.enImu)add('IMU',s.imuConnected?'ok':'bad',s.imuConnected?'OK':TL('none_2'),'diag');
   if(!s.motorDriverEn)add(TL('motor'),'muted',TL('disabled'),'calibration');
   else{
     const rs=isNum(s.runState)?s.runState:0,cs=(s.currentSensEn&&isNum(s.currState))?s.currState:2;
     const unarmed=s.motorArmed===false;   // after a restart the motor stays still until steering was seen OFF; engaged + unarmed = it will not move
     const bad=rs>=2||cs===3||cs===4||(unarmed&&!!s.cmdEngaged),warn=!bad&&(cs===1||!!s.kickoutActive||unarmed||motorSettingsMissing(s));
-    add(TL('motor'),bad?'bad':warn?'warn':'ok',rs>=2?TL('stop_protection'):cs===3?TL('overcurrent_2'):cs===4?TL('current_sensor_error'):unarmed?TL('not_armed_switch_steering_off_and_on'):cs===1?TL('no_current_data'):s.kickoutActive?'kickout':motorSettingsMissing(s)?TL('no_settings_from_aow'):TL('healthy'),'calibration');
+    add(TL('motor'),bad?'bad':warn?'warn':'ok',rs>=2?TL('stop_protection'):cs===3?TL('overcurrent_2'):cs===4?TL('current_sensor_error'):unarmed?TL('not_armed_switch_steering_off_and_on'):cs===1?TL('no_current_data'):s.kickoutActive?TL('kickout_active'):motorSettingsMissing(s)?TL('no_settings_from_aow'):TL('healthy'),'calibration');
   }
   if(s.sectionExpCfg&&!s.sectionExpEn)add(TL('section_expander'),'warn',TL('not_responding'),'diag');
   const bads=k.filter(x=>x.c==='bad').length,warns=k.filter(x=>x.c==='warn').length;
@@ -179,6 +181,21 @@ function updStatus(s){
 function updHeader(s){
   const c=netCls(s);$('#mainDot').className='dot '+c;
   $('#netChip').textContent=s.apMode?'AP':s.netConnected?(s.netType==='WiFi'?'WiFi '+s.rssi+' dBm':s.netType):TL('no_network');
+  updStrip(s);
+}
+/* A slim "ready to drive" bar under the title on every tab except Status (which has the full card): verdict + the first problems; tap = Status. */
+function fixHeaderH(){const h=document.querySelector('header.top');if(h)document.documentElement.style.setProperty('--hh',h.offsetHeight+'px');}
+function updStrip(s){
+  const b=$('#rstrip');if(!b)return;
+  const was=b.hidden;
+  if(curTab==='status'){b.hidden=true;}
+  else{
+    const r=readiness(s),bad=r.k.filter(x=>x.c==='bad'||x.c==='warn');
+    b.hidden=false;b.style.setProperty('--c',TC[r.v]);
+    b.children[0].textContent=r.v==='ok'?TL('ready_to_drive'):r.v==='warn'?TL('ready_with_warnings_n',{n:r.warns}):TL('not_ready_n',{n:r.bads});
+    b.children[1].textContent=bad.slice(0,3).map(x=>x.n+': '+x.t).join(' • ');
+  }
+  if(was!==b.hidden||!b.hidden)fixHeaderH();
 }
 
 /* --- calibration --- */
@@ -363,6 +380,7 @@ function buildCal(){
     if(!(await askConfirm(TL('confirm_save_imu_rotation'))))return;
     await post('/settings_save_imu_rotation',{rotDeg:v,rollInvert:INP.setImuRollInvert.checked?'1':'0'},TL('board_rotation_saved'));});
   foldLong(g);   // the step-by-step instructions fold under "Details" (the cards stay short and line up)
+  cardFolding(g);
 }
 function updCal(s){
   $('#calAngle').textContent=s.steerSensorOk?f(s.steerAngleDeg,1,'°'):TL('none');

@@ -8,6 +8,50 @@ Panel to strona WWW serwowana przez sam moduł - bez aplikacji i bez internetu. 
 pod IP modułu albo pod `192.168.4.1` w trybie punktu dostępowego. Język (polski / angielski) i motyw (ciemny / jasny /
 niebieski) wybierasz w nagłówku strony.
 
+Przydatne drobiazgi: panel otwiera się na ostatnio używanej zakładce. Na każdej zakładce oprócz Status wąski pasek pod nagłówkiem
+pokazuje „Gotowy do jazdy” (albo pierwsze rzeczy, które nie są gotowe); dotknięcie otwiera Status. Przycisk **A+** w nagłówku
+włącza tryb terenowy (większe przyciski, pola i zakładki do używania w kabinie); jest zapamiętywany w przeglądarce. W Ustawieniach
+kategorie (Sieć, Połączenie z AgOpenWeb, ...) zwijają się po dotknięciu tytułu - otwarta jest tylko pierwsza - a pole wyszukiwania
+na górze filtruje ustawienia po nazwie lub opisie; pięć ostatnio edytowanych kart pojawia się nad nimi jako skróty („Ostatnio edytowane”). Na telefonie tryb terenowy sprawia, że pasek zakładek przewija się na boki. Zakładka Dziennik ma **Raport diagnostyczny** (pobranie) i **Kopiuj raport** (do schowka, bez haseł) do zgłaszania błędów.
+
+## Na komputerze, tablecie i telefonie
+
+Ten sam panel dopasowuje się do ekranu: na komputerze karty leżą obok siebie, na tablecie w dwóch kolumnach, a na telefonie zakładki przechodzą na dół ekranu. Zrzuty wszystkich głównych zakładek:
+
+<table>
+<tr><th>Komputer</th><th>Tablet</th><th>Telefon</th></tr>
+<tr><td colspan="3"><b>Status</b></td></tr>
+<tr>
+<td valign="top"><img src="../img/panel-status-pl.png" alt="Status" width="420"></td>
+<td valign="top"><img src="../img/panel-status-tablet-pl.png" alt="Status" width="300"></td>
+<td valign="top"><img src="../img/panel-status-phone-pl.png" alt="Status" width="150"></td>
+</tr>
+<tr><td colspan="3"><b>Odczyt</b></td></tr>
+<tr>
+<td valign="top"><img src="../img/panel-readings-pl.png" alt="Odczyt" width="420"></td>
+<td valign="top"><img src="../img/panel-readings-tablet-pl.png" alt="Odczyt" width="300"></td>
+<td valign="top"><img src="../img/panel-readings-phone-pl.png" alt="Odczyt" width="150"></td>
+</tr>
+<tr><td colspan="3"><b>Wykresy</b></td></tr>
+<tr>
+<td valign="top"><img src="../img/panel-charts-pl.png" alt="Wykresy" width="420"></td>
+<td valign="top"><img src="../img/panel-charts-tablet-pl.png" alt="Wykresy" width="300"></td>
+<td valign="top"><img src="../img/panel-charts-phone-pl.png" alt="Wykresy" width="150"></td>
+</tr>
+<tr><td colspan="3"><b>Kalibracja</b></td></tr>
+<tr>
+<td valign="top"><img src="../img/panel-calibration-pl.png" alt="Kalibracja" width="420"></td>
+<td valign="top"><img src="../img/panel-calibration-tablet-pl.png" alt="Kalibracja" width="300"></td>
+<td valign="top"><img src="../img/panel-calibration-phone-pl.png" alt="Kalibracja" width="150"></td>
+</tr>
+<tr><td colspan="3"><b>Ustawienia</b></td></tr>
+<tr>
+<td valign="top"><img src="../img/panel-settings-pl.png" alt="Ustawienia" width="420"></td>
+<td valign="top"><img src="../img/panel-settings-tablet-pl.png" alt="Ustawienia" width="300"></td>
+<td valign="top"><img src="../img/panel-settings-phone-pl.png" alt="Ustawienia" width="150"></td>
+</tr>
+</table>
+
 ## Status
 
 ![Zakładka Status](../img/panel-status-pl.png)
@@ -24,6 +68,8 @@ Wszystkie wartości na żywo w jednym miejscu: pozycja i dokładność GPS, prę
 od AgOpenWeb (zadany kąt, prędkość, sekcje), sieć i RTCM, obciążenie i pamięć. Karta **Hydraulika** pokazuje stan podnośnika i kto
 nim steruje (AgOpenWeb czy ręcznie) oraz ma przyciski Podnieś / Opuść / Auto. Podnieś i Opuść proszą o potwierdzenie;
 Auto działa zawsze, a po restarcie zawsze wraca automat.
+
+W Odczycie i Kalibracji kartę zwijasz dotknięciem jej tytułu; **Zwiń wszystko** / **Rozwiń wszystko** nad kartami robią to dla całej zakładki, a przeglądarka pamięta wybór. Długie objaśnienia wszędzie są schowane pod **Szczegóły**.
 
 ## Wykresy
 
@@ -91,7 +137,7 @@ silnik w ułamku sekundy; zaznacz **Odwróć kierunek silnika**, zapisz i powtó
 
 Zakładka jest podzielona na sekcje z tytułami - Sieć, Połączenie z AgOpenWeb, Zabezpieczenie panelu i kopia, Poprawki RTK
 (NTRIP), Sprzęt i czasy, Dziennik diagnostyczny, Moduł - z przyciskami u góry do szybkiego przejścia. Długie opisy są
-schowane pod „Szczegóły”.
+schowane pod „Szczegóły”. Na telefonie każdą sekcję można zwinąć dotknięciem tytułu, a otwarta na początku jest tylko pierwsza.
 
 | Karta | Co robi |
 |---|---|
