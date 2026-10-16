@@ -334,10 +334,20 @@ function buildCal(){
   act('#curSave',async()=>{if(!validate(['setCurKickA','setCurKickMs','setCurHardA']))return;
     if(!(await askConfirm(TL('confirm_save_current_thresholds'))))return;
     await post('/settings_save_current',vals({currKickoutA:'setCurKickA',currKickoutMs:'setCurKickMs',currHardA:'setCurHardA'}),TL('current_thresholds_saved'));});
+  // the three angle fields follow the module: after a calibration or a reset they show the saved angles (never while being typed in)
+  let angKey='';
+  const syncAng=s=>{
+    if(!isNum(s.imuMountYaw))return;
+    const key=[s.imuMountYaw,s.imuMountPitch,s.imuMountRoll].join();
+    if(key===angKey)return;angKey=key;
+    const fs=[INP.setImuBy,INP.setImuBp,INP.setImuBr];
+    if(fs.some(e=>e&&e===document.activeElement))return;
+    [s.imuMountYaw,s.imuMountPitch,s.imuMountRoll].forEach((v,i)=>{if(fs[i])fs[i].value=Number(v).toFixed(1);});
+  };
   calCards.imuList=mkRows($('#imuCalRows'),[
    [TL('imu_angles_raw_sensor'),s=>f(s.imuRollRaw,1)+' / '+f(s.imuPitchRaw,1)+' / '+f(s.imuYawRaw,1)+'°'],
    [TL('imu_angles_after_correction'),s=>f(s.imuRoll,1)+' / '+f(s.imuPitch,1)+' / '+f(s.imuHeading,1)+'°'],
-   [TL('imu_board_angles'),s=>isNum(s.imuMountYaw)?f(s.imuMountYaw,1)+' / '+f(s.imuMountPitch,1)+' / '+f(s.imuMountRoll,1)+'°':'—',()=>'ok'],
+   [TL('imu_board_angles'),s=>{syncAng(s);return isNum(s.imuMountYaw)?f(s.imuMountYaw,1)+' / '+f(s.imuMountPitch,1)+' / '+f(s.imuMountRoll,1)+'°':'—'},()=>'ok'],
    [TL('imu_3d_mounting'),s=>(s.imuMount3d||Math.abs(s.imuRotDeg)>0)?TL('imu_mount_on'):TL('imu_mount_off'),()=>'ok']]);
   act('#calL',async()=>{if(await askConfirm(TL('save_this_position_as_an_angle_end_point')))await post('/steering_cal_left',null,TL('left_saved_adc_n',{n:S?S.steerRaw:'?'}));});
   act('#calR',async()=>{if(await askConfirm(TL('save_this_position_as_an_angle_end_point')))await post('/steering_cal_right',null,TL('right_saved_adc_n',{n:S?S.steerRaw:'?'}));});
