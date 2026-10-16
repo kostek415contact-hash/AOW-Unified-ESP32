@@ -13,13 +13,18 @@
 // Used by: sensors/imu_sensor.h, web/runtime_settings.h, web/web_server.h
 // ======================================================================
 //
-// MODEL. The sensor reports Euler angles of the aerospace kind, Z-Y-X: its orientation is R = Rz(a) Ry(b) Rx(c) with
-//   a = sy * yaw, b = sp * pitch, c = sr * roll, sy = -sa      (angles in radians)
+// MODEL. The sensor reports yaw / pitch / roll as three rotations in a fixed order. Two structures exist and the calibration
+// tells them apart by itself (variable `var`):
+//   var 1 (the BNO085 in UART-RVC mode, measured on the hardware): R = Rz(a) Rx(b) Ry(c)  - pitch turns about X, roll about Y
+//         world Z in the sensor axes g = (-cos b sin c, sin b, cos b cos c)
+//   var 0 (classic aerospace Z-Y-X):                               R = Rz(a) Ry(b) Rx(c)  - pitch about Y, roll about X
+//         g = (-sin b, sin c cos b, cos c cos b)
+// with a = sy * yaw, b = sp * pitch, c = sr * roll, sy = -sa      (angles in radians)
 // where sp, sr, sa are +1 / -1. sa says whether the sensor's "world Z" points UP (+1) or DOWN (-1); sy = -sa because the yaw
 // of this project is measured clockwise (a right turn is positive - confirmed on the hardware). The third row of R is the world Z
-// axis seen in the sensor axes: g = (-sin b, sin c cos b, cos c cos b); when the sensor stands still, the accelerometer reads
-// (up * 9.81) in the same axes, so g = sa * accel/|accel|. Calibration tries the 8 sign combinations (sp, sr, sa) and keeps the one
-// that explains the accelerometer in both poses; if two combinations explain it equally well the answer is "unclear" (this happens
+// axis seen in the sensor axes (g, see above); when the sensor stands still, the accelerometer reads
+// (up * 9.81) in the same axes, so g = sa * accel/|accel|. Calibration tries the 2 structures x 8 sign combinations (sp, sr, sa) and keeps
+// the one that explains the accelerometer in both poses; if two combinations explain it equally well the answer is "unclear" (this happens
 // for a board lying flat - then the plain board rotation in config.h is the right tool).
 //
 // MOUNT. m[] (row-major 3x3) has the VEHICLE axes as columns, written in the sensor axes: column 0 = forward, column 2 = the
@@ -48,6 +53,7 @@ inline bool finite3(const V3& a) { return std::isfinite(a.x) && std::isfinite(a.
 struct Mount {
     bool valid = false;
     int8_t sp = 1, sr = 1, sa = 1;                 // sign conventions of the sensor (see MODEL)
+    int8_t var = 1;                                // structure of the sensor's angles: 1 = BNO085 RVC (pitch about X, roll about Y), 0 = Z-Y-X
     float m[9] = {1, 0, 0, 0, 1, 0, 0, 0, 1};      // vehicle axes (columns) in sensor axes, row-major
 };
 
@@ -64,8 +70,9 @@ constexpr float MIN_TILT_DEG = 3.0f;                       // the second pose mu
 constexpr float MAX_MATCH_ERR = 0.03f;                     // sum of squared differences (about 6 deg per pose)
 
 // Third row of the rotation matrix: the world Z axis in the sensor axes.
-inline V3 worldZ(float pitchDeg, float rollDeg, int sp, int sr) {
+inline V3 worldZ(float pitchDeg, float rollDeg, int sp, int sr, int var = 1) {
     const float b = sp * pitchDeg * DEG2RAD, c = sr * rollDeg * DEG2RAD;
+    if (var == 1) return { -std::cos(b) * std::sin(c), std::sin(b), std::cos(b) * std::cos(c) };
     return { -std::sin(b), std::sin(c) * std::cos(b), std::cos(c) * std::cos(b) };
 }
 
@@ -77,14 +84,22 @@ inline void eulerZYX(float a, float b, float c, float R[9]) {
     R[3] = cb * sa_; R[4] = sc * sb * sa_ + cc * ca;  R[5] = cc * sb * sa_ - sc * ca;
     R[6] = -sb;      R[7] = sc * cb;                  R[8] = cc * cb;
 }
-inline void rotation(float yawDeg, float pitchDeg, float rollDeg, int sp, int sr, int sa, float R[9]) {
-    eulerZYX(-sa * yawDeg * DEG2RAD, sp * pitchDeg * DEG2RAD, sr * rollDeg * DEG2RAD, R);
+// R = Rz(a) Rx(b) Ry(c) (the BNO085 RVC structure)
+inline void eulerZXY(float a, float b, float c, float R[9]) {
+    const float ca = std::cos(a), sa_ = std::sin(a), cb = std::cos(b), sb = std::sin(b), cc = std::cos(c), sc = std::sin(c);
+    const float X0[3] = {cc, 0.0f, sc}, X1[3] = {sb * sc, cb, -sb * cc}, X2[3] = {-cb * sc, sb, cb * cc};
+    for (int j = 0; j < 3; j++) { R[j] = ca * X0[j] - sa_ * X1[j]; R[3 + j] = sa_ * X0[j] + ca * X1[j]; R[6 + j] = X2[j]; }
+}
+inline void rotation(float yawDeg, float pitchDeg, float rollDeg, int sp, int sr, int sa, int var, float R[9]) {
+    if (var == 1) eulerZXY(-sa * yawDeg * DEG2RAD, sp * pitchDeg * DEG2RAD, sr * rollDeg * DEG2RAD, R);
+    else eulerZYX(-sa * yawDeg * DEG2RAD, sp * pitchDeg * DEG2RAD, sr * rollDeg * DEG2RAD, R);
 }
 }  // namespace detail
 
 // True when the matrix is a proper rotation (orthonormal, det +1) and the signs are +-1.
 inline bool mountOk(const Mount& k) {
     if (!(k.sp == 1 || k.sp == -1) || !(k.sr == 1 || k.sr == -1) || !(k.sa == 1 || k.sa == -1)) return false;
+    if (!(k.var == 0 || k.var == 1)) return false;
     for (int i = 0; i < 9; i++) if (!std::isfinite(k.m[i]) || std::fabs(k.m[i]) > 1.001f) return false;
     for (int i = 0; i < 3; i++) for (int j = 0; j < 3; j++) {
         float d = 0;
@@ -98,7 +113,7 @@ inline bool mountOk(const Mount& k) {
 // Heading, pitch and roll of the VEHICLE from the sensor's raw angles. Heading in -180..180 (same convention as the raw yaw).
 inline void apply(const Mount& k, float yawDeg, float pitchDeg, float rollDeg, float& hdgOut, float& pitchOut, float& rollOut) {
     float R[9], Rv[9];
-    detail::rotation(yawDeg, pitchDeg, rollDeg, k.sp, k.sr, k.sa, R);
+    detail::rotation(yawDeg, pitchDeg, rollDeg, k.sp, k.sr, k.sa, k.var, R);
     for (int i = 0; i < 3; i++) for (int j = 0; j < 3; j++)
         Rv[3 * i + j] = R[3 * i] * k.m[j] + R[3 * i + 1] * k.m[3 + j] + R[3 * i + 2] * k.m[6 + j];
     const float a = std::atan2(Rv[3], Rv[0]);
@@ -126,21 +141,21 @@ inline Result solve(const Pose& A, const Pose& B, Tilt kind, Mount& out) {
     // The second pose must really differ from the first (measured with the accelerometer, which needs no convention).
     if (norm(cross(acc[1], acc[0])) < std::sin(MIN_TILT_DEG * DEG2RAD)) return Result::TILT_TOO_SMALL;
     float best = 1e9f, second = 1e9f;
-    int bsp = 1, bsr = 1, bsa = 1;
-    for (int sp = -1; sp <= 1; sp += 2) for (int sr = -1; sr <= 1; sr += 2) for (int sa = -1; sa <= 1; sa += 2) {
+    int bsp = 1, bsr = 1, bsa = 1, bvar = 1;
+    for (int var = 1; var >= 0; var--) for (int sp = -1; sp <= 1; sp += 2) for (int sr = -1; sr <= 1; sr += 2) for (int sa = -1; sa <= 1; sa += 2) {
         float e = 0;
         for (int i = 0; i < 2; i++) {
-            const V3 g = worldZ(P[i]->pitchDeg, P[i]->rollDeg, sp, sr);
+            const V3 g = worldZ(P[i]->pitchDeg, P[i]->rollDeg, sp, sr, var);
             const V3 d{g.x - sa * acc[i].x, g.y - sa * acc[i].y, g.z - sa * acc[i].z};
             e += dot(d, d);
         }
-        if (e < best) { second = best; best = e; bsp = sp; bsr = sr; bsa = sa; }
+        if (e < best) { second = best; best = e; bsp = sp; bsr = sr; bsa = sa; bvar = var; }
         else if (e < second) second = e;
     }
     if (best > MAX_MATCH_ERR) return Result::CONVENTION_UNCLEAR;                 // the angles do not agree with the accelerometer at all
-    if (second < 0.1f && second < 4.0f * best + 0.01f) return Result::CONVENTION_UNCLEAR;   // a different sign set explains it about as well
+    if (second < 4.0f * best + 0.01f) return Result::CONVENTION_UNCLEAR;   // a different sign set explains it about as well
     // "up" in the sensor axes in both poses (from the angles, the same source that is used at run time).
-    const V3 gA = worldZ(A.pitchDeg, A.rollDeg, bsp, bsr), gB = worldZ(B.pitchDeg, B.rollDeg, bsp, bsr);
+    const V3 gA = worldZ(A.pitchDeg, A.rollDeg, bsp, bsr, bvar), gB = worldZ(B.pitchDeg, B.rollDeg, bsp, bsr, bvar);
     const V3 upA = scale(gA, (float)bsa), upB = scale(gB, (float)bsa);
     V3 axis = cross(upB, upA);                      // along the tilt axis
     const float sinT = norm(axis);
@@ -153,7 +168,7 @@ inline Result solve(const Pose& A, const Pose& B, Tilt kind, Mount& out) {
     const V3 y = cross(z, f);
     const float col0[3] = {f.x, f.y, f.z}, col1[3] = {y.x, y.y, y.z}, col2[3] = {z.x, z.y, z.z};
     for (int i = 0; i < 3; i++) { out.m[3 * i] = col0[i]; out.m[3 * i + 1] = col1[i]; out.m[3 * i + 2] = col2[i]; }
-    out.sp = (int8_t)bsp; out.sr = (int8_t)bsr; out.sa = (int8_t)bsa;
+    out.sp = (int8_t)bsp; out.sr = (int8_t)bsr; out.sa = (int8_t)bsa; out.var = (int8_t)bvar;
     out.valid = mountOk(out);
     (void)r;
     return out.valid ? Result::OK : Result::BAD_INPUT;
@@ -171,27 +186,26 @@ inline void boardAngles(const Mount& k, float& yawDeg, float& pitchDeg, float& r
 }
 
 // The mount from the board's angles typed by hand (the inverse of boardAngles). The sign convention (sp, sr, sa) of the sensor cannot be known
-// from the angles - it is kept from an earlier calibration, or +1 +1 +1 is assumed. False when the angles are out of range or the board
-// would stand too close to its edge for the sensor's own Euler angles (see MAX_ABS_PITCH_DEG).
-inline bool fromBoardAngles(float yawDeg, float pitchDeg, float rollDeg, int sp, int sr, int sa, Mount& out) {
+// from the angles - it is kept from an earlier calibration, or +1 +1 +1 and the BNO085 structure (var 1) are assumed. False when the angles are out of range or the board
+// would stand within one degree of the Euler singularity (pitch 90).
+inline bool fromBoardAngles(float yawDeg, float pitchDeg, float rollDeg, int sp, int sr, int sa, int var, Mount& out) {
     out = Mount();
     if (!std::isfinite(yawDeg) || !std::isfinite(pitchDeg) || !std::isfinite(rollDeg)) return false;
     if (std::fabs(yawDeg) > 180.0f || std::fabs(pitchDeg) > 90.0f || std::fabs(rollDeg) > 180.0f) return false;
     float R[9];
     detail::eulerZYX(yawDeg * DEG2RAD, pitchDeg * DEG2RAD, rollDeg * DEG2RAD, R);   // sensor -> vehicle
-    Mount k; k.sp = (int8_t)sp; k.sr = (int8_t)sr; k.sa = (int8_t)sa;
+    Mount k; k.sp = (int8_t)sp; k.sr = (int8_t)sr; k.sa = (int8_t)sa; k.var = (int8_t)var;
     for (int i = 0; i < 3; i++) for (int j = 0; j < 3; j++) k.m[3 * i + j] = R[3 * j + i];   // M = R^T
-    // the vehicle's Z column is the world Z in the sensor axes while level: its X component is -sin(sensor pitch)
-    if (std::fabs(k.m[2]) > std::sin(MAX_ABS_PITCH_DEG * DEG2RAD)) return false;
+        if (std::fabs(k.m[2]) > std::sin(89.0f * DEG2RAD)) return false;   // the Euler decomposition of the mounting loses a degree of freedom at 90 deg
     if (!mountOk(k)) return false;
     k.valid = true; out = k;
     return true;
 }
 
-// ---------- text form (settings backup): "1;sp;sr;sa;m0,m1,...,m8" ----------
+// ---------- text form (settings backup): "V;sp;sr;sa;m0,m1,...,m8"  V = 1 (structure var 0) or 2 (var 1) ----------
 inline int format(const Mount& k, char* buf, size_t n) {
     if (!k.valid) { if (n) buf[0] = 0; return 0; }
-    return std::snprintf(buf, n, "1;%d;%d;%d;%.6f,%.6f,%.6f,%.6f,%.6f,%.6f,%.6f,%.6f,%.6f", (int)k.sp, (int)k.sr, (int)k.sa,
+    return std::snprintf(buf, n, "%d;%d;%d;%d;%.6f,%.6f,%.6f,%.6f,%.6f,%.6f,%.6f,%.6f,%.6f", k.var == 1 ? 2 : 1, (int)k.sp, (int)k.sr, (int)k.sa,
                          k.m[0], k.m[1], k.m[2], k.m[3], k.m[4], k.m[5], k.m[6], k.m[7], k.m[8]);
 }
 // Empty text = "off" (valid = false, returns true). Returns false for anything malformed or not a proper rotation.
@@ -199,7 +213,8 @@ inline bool parse(const char* s, Mount& out) {
     out = Mount();
     if (!s || !*s) return true;
     char* e = nullptr;
-    if (std::strtol(s, &e, 10) != 1 || *e != ';') return false;
+    const long ver = std::strtol(s, &e, 10);
+    if ((ver != 1 && ver != 2) || *e != ';') return false;
     s = e + 1;
     int sg[3];
     for (int i = 0; i < 3; i++) {
@@ -215,7 +230,7 @@ inline bool parse(const char* s, Mount& out) {
         if (i < 8) { if (*s != ',') return false; s++; }
     }
     if (*s) return false;
-    Mount k; k.sp = (int8_t)sg[0]; k.sr = (int8_t)sg[1]; k.sa = (int8_t)sg[2];
+    Mount k; k.sp = (int8_t)sg[0]; k.sr = (int8_t)sg[1]; k.sa = (int8_t)sg[2]; k.var = (ver == 2) ? 1 : 0;
     std::memcpy(k.m, m, sizeof(m));
     if (!mountOk(k)) return false;
     k.valid = true; out = k;

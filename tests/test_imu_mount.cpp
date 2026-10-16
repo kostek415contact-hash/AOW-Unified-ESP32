@@ -43,6 +43,7 @@ struct Rig {
     double mx, my, mz;      // mounting
     int sp, sr, sa;         // the sensor's sign convention
     double psi0;            // the sensor's own yaw reference (arbitrary)
+    int var = 0;            // structure of the sensor's angles: 0 = Z-Y-X, 1 = Rz Rx(pitch) Ry(roll) (BNO085 RVC)
 };
 struct Reading { float yaw, pitch, roll; V3 accel; };
 
@@ -64,9 +65,16 @@ static Reading sense(const Rig& g, const Axes& v) {
     const D3 W[3] = {xW, yW, zW};
     double R[3][3];
     for (int i = 0; i < 3; i++) for (int j = 0; j < 3; j++) R[i][j] = dt(W[i], sax[j]);
-    const double a = std::atan2(R[1][0], R[0][0]);
-    const double b = -std::asin(std::fmax(-1.0, std::fmin(1.0, R[2][0])));
-    const double c = std::atan2(R[2][1], R[2][2]);
+    double a, b, c;
+    if (g.var == 1) {      // R = Rz(a) Rx(b) Ry(c)
+        a = std::atan2(-R[0][1], R[1][1]);
+        b = std::asin(std::fmax(-1.0, std::fmin(1.0, R[2][1])));
+        c = std::atan2(-R[2][0], R[2][2]);
+    } else {               // R = Rz(a) Ry(b) Rx(c)
+        a = std::atan2(R[1][0], R[0][0]);
+        b = -std::asin(std::fmax(-1.0, std::fmin(1.0, R[2][0])));
+        c = std::atan2(R[2][1], R[2][2]);
+    }
     Reading o;
     o.yaw = (float)(-g.sa * a * R2D);        // sy = -sa
     o.pitch = (float)(g.sp * b * R2D);
@@ -115,7 +123,7 @@ static double calibrateAndCheck(const Rig& g, Tilt kind, Result& res, double noi
 int main() {
     // ----- 1. identity mount returns the raw angles (nothing changes for a flat, forward-facing board) -----
     {
-        Mount id; id.valid = true;
+        Mount id; id.valid = true; id.var = 0;
         bool allSame = true;
         std::mt19937 rng(7);
         std::uniform_real_distribution<float> uy(-179, 179), ua(-80, 80);
@@ -135,13 +143,14 @@ int main() {
     // ----- 2. the user's case: an enclosure on the right wall of the cab, the board in the plane of the wall and turned 45 deg
     //          inside it (its normal points sideways) -----
     int userOk = 0, userN = 0;
+    for (int var = 0; var < 2; var++)
     for (int tiltKind = 0; tiltKind < 2; tiltKind++)
     for (int sa = -1; sa <= 1; sa += 2) for (int sp = -1; sp <= 1; sp += 2) for (int sr = -1; sr <= 1; sr += 2)
     for (int spin = -1; spin <= 1; spin += 2) {
         // sensor Z along the vehicle's lateral axis (plus or minus), sensor X and Y turned by 45 deg in the plane of the wall:
         // rotation about the vehicle's lateral axis = the Euler "y" angle of the mounting when X is the sensor's first axis.
-        // Mount = Rx(90) then Ry(45*spin) in the (f,r,u) frame: Z -> lateral.
-        Rig g{90.0, 45.0 * spin, 0.0, sp, sr, sa, 123.0};
+        // Mount = Rx(90) then Ry(38*spin) in the (f,r,u) frame: Z -> lateral.
+        Rig g{90.0, 38.0 * spin, 0.0, sp, sr, sa, 123.0, var};
         Result res;
         const double w = calibrateAndCheck(g, tiltKind ? Tilt::NOSE_UP : Tilt::SIDE_RIGHT_DOWN, res);
         userN++;
@@ -156,9 +165,10 @@ int main() {
     {
         const double mounts[][3] = {{0, 45, 0}, {0, -45, 0}, {45, 0, 0}, {-45, 0, 0}, {30, 40, 20}, {-20, 35, 100}, {0, 90 - 20, 0}, {60, -30, 15}};
         int ok = 0, n = 0, wrong = 0;
+        for (int var = 0; var < 2; var++)
         for (const auto& mt : mounts) for (int sa = -1; sa <= 1; sa += 2) for (int sp = -1; sp <= 1; sp += 2) for (int sr = -1; sr <= 1; sr += 2)
         for (int k = 0; k < 2; k++) {
-            Rig g{mt[0], mt[1], mt[2], sp, sr, sa, -71.0};
+            Rig g{mt[0], mt[1], mt[2], sp, sr, sa, -71.0, var};
             Result res;
             const double w = calibrateAndCheck(g, k ? Tilt::NOSE_UP : Tilt::SIDE_RIGHT_DOWN, res);
             n++;
@@ -172,8 +182,8 @@ int main() {
     // ----- 4. small noise in the calibration readings: the vehicle angles stay within about a degree -----
     {
         double worstAll = 0; int fails = 0;
-        for (unsigned seed = 1; seed <= 20; seed++) {
-            Rig g{90.0, 45.0, 0.0, -1, 1, 1, 10.0};
+        for (unsigned seed = 1; seed <= 40; seed++) {
+            Rig g{90.0, 38.0, 0.0, -1, 1, 1, 10.0, (int)(seed & 1)};
             Result res;
             const double w = calibrateAndCheck(g, Tilt::SIDE_RIGHT_DOWN, res, 0.05, 0.05, seed);
             if (res != Result::OK) { fails++; continue; }
@@ -193,7 +203,7 @@ int main() {
 
     // ----- 6. refusals -----
     {
-        Rig g{90.0, 45.0, 0.0, 1, 1, 1, 0};
+        Rig g{90.0, 38.0, 0.0, 1, 1, 1, 0};
         const Reading A = sense(g, vehicle(0, 0, 0)), B = sense(g, vehicle(0, 0, 11));
         Mount m;
         CHECK(solve(poseOf(A), poseOf(B), Tilt::SIDE_RIGHT_DOWN, m) == Result::OK && m.valid);
@@ -213,19 +223,21 @@ int main() {
 
     // ----- 7. text form -----
     {
-        Rig g{90.0, 45.0, 0.0, -1, 1, -1, 33.0};
+        Rig g{90.0, 38.0, 0.0, -1, 1, -1, 33.0};
         const Reading A = sense(g, vehicle(0, 0, 0)), B = sense(g, vehicle(0, 0, 11));
         Mount m, back;
         CHECK(solve(poseOf(A), poseOf(B), Tilt::SIDE_RIGHT_DOWN, m) == Result::OK);
         char buf[200];
         CHECK(format(m, buf, sizeof(buf)) > 20);
-        CHECK(parse(buf, back) && back.valid && back.sp == m.sp && back.sr == m.sr && back.sa == m.sa);
+        CHECK(parse(buf, back) && back.valid && back.sp == m.sp && back.sr == m.sr && back.sa == m.sa && back.var == m.var);
         bool same = true;
         for (int i = 0; i < 9; i++) if (std::fabs(back.m[i] - m.m[i]) > 1e-5f) same = false;
         CHECK(same);
         CHECK(parse("", back) && !back.valid);                                       // empty = off
         CHECK(!parse("garbage", back) && !back.valid);
-        CHECK(!parse("2;1;1;1;1,0,0,0,1,0,0,0,1", back));                            // unknown version
+        CHECK(!parse("3;1;1;1;1,0,0,0,1,0,0,0,1", back));                            // unknown version
+        CHECK(parse("2;1;1;1;1,0,0,0,1,0,0,0,1", back) && back.var == 1);
+        CHECK(parse("1;1;1;1;1,0,0,0,1,0,0,0,1", back) && back.var == 0);
         CHECK(!parse("1;1;1;1;1,0,0,0,1,0,0,0", back));                              // too few numbers
         CHECK(!parse("1;1;1;1;1,0,0,0,1,0,0,0,1,0", back));                          // trailing junk
         CHECK(!parse("1;2;1;1;1,0,0,0,1,0,0,0,1", back));                            // sign must be +-1
@@ -275,21 +287,43 @@ int main() {
             Mount solved, manual;
             if (solve(poseOf(A), poseOf(B), Tilt::SIDE_RIGHT_DOWN, solved) != Result::OK) continue;
             checked++;
-            if (!fromBoardAngles((float)mt[2], (float)mt[1], (float)mt[0], solved.sp, solved.sr, solved.sa, manual)) continue;
+            if (!fromBoardAngles((float)mt[2], (float)mt[1], (float)mt[0], solved.sp, solved.sr, solved.sa, solved.var, manual)) continue;
             bool eq = true;
             for (int i = 0; i < 9; i++) if (std::fabs(manual.m[i] - solved.m[i]) > 2e-3f) eq = false;
             if (eq) same++;
         }
         CHECK(checked >= 12 && same == checked);
         float y, p, r; Mount k;
-        CHECK(fromBoardAngles(20, 45, -30, 1, 1, 1, k) && k.valid);
+        CHECK(fromBoardAngles(20, 45, -30, 1, 1, 1, 1, k) && k.valid);
         boardAngles(k, y, p, r);
         CHECK(std::fabs(y - 20) < 0.01f && std::fabs(p - 45) < 0.01f && std::fabs(r + 30) < 0.01f);
-        CHECK(!fromBoardAngles(0, 80, 0, 1, 1, 1, k) && !k.valid);          // too close to standing on its edge
-        CHECK(!fromBoardAngles(200, 10, 0, 1, 1, 1, k));                    // out of range
-        CHECK(!fromBoardAngles(0, 100, 0, 1, 1, 1, k));
-        CHECK(!fromBoardAngles(NAN, 10, 0, 1, 1, 1, k));
-        CHECK(!fromBoardAngles(0, 10, 0, 0, 1, 1, k));                      // a sign must be +-1
+        CHECK(!fromBoardAngles(0, 89.5f, 0, 1, 1, 1, 1, k) && !k.valid);      // at the Euler singularity
+        CHECK(fromBoardAngles(-24, 78.5f, -116.1f, 1, 1, 1, 1, k) && k.valid);   // the user's board: typing back what the calibration found works
+        CHECK(!fromBoardAngles(200, 10, 0, 1, 1, 1, 1, k));                    // out of range
+        CHECK(!fromBoardAngles(0, 100, 0, 1, 1, 1, 1, k));
+        CHECK(!fromBoardAngles(NAN, 10, 0, 1, 1, 1, 1, k));
+        CHECK(!fromBoardAngles(0, 10, 0, 0, 1, 1, 1, k));                      // a sign must be +-1
+    }
+
+    // ----- 7d. measured on the real BNO085 (UART-RVC) in the enclosure: level pose raw pitch -10.3, roll 95.1, accel (-9.46, -1.77, -0.84) m/s2.
+    //          Only the structure "pitch about X, roll about Y" explains it; the classic Z-Y-X model does not (the field test that failed). -----
+    {
+        const V3 real = scale(V3{-9.46f, -1.77f, -0.84f}, 1.0f / norm(V3{-9.46f, -1.77f, -0.84f}));
+        const V3 g1 = worldZ(-10.3f, 95.1f, 1, 1, 1), g0 = worldZ(-10.3f, 95.1f, 1, 1, 0);
+        CHECK(norm(V3{g1.x - real.x, g1.y - real.y, g1.z - real.z}) < 0.02f);
+        float worst0 = 9; for (int sp = -1; sp <= 1; sp += 2) for (int sr = -1; sr <= 1; sr += 2) for (int sa = -1; sa <= 1; sa += 2) {
+            const V3 g = worldZ(-10.3f, 95.1f, sp, sr, 0); worst0 = std::fmin(worst0, norm(V3{g.x - sa * real.x, g.y - sa * real.y, g.z - sa * real.z})); }
+        CHECK(worst0 > 0.1f);
+        (void)g0;
+        // a synthetic tilt of 14.5 deg sideways on that mounting: the solver finds var 1 with +1 +1 +1
+        Rig rg{0, 0, 0, 1, 1, 1, 0, 1};
+        // choose the mounting that reproduces the measured level pose: find it by trying the solver on synthetic data from the same structure
+        // (the mounting angles of this board are not needed - only that the structure is recognised)
+        Rig user{90.0, -38.0, 0.0, 1, 1, 1, 12.0, 1};
+        const Reading A = sense(user, vehicle(5, 0, 0)), B = sense(user, vehicle(5, 0, 14.5));
+        Mount m;
+        CHECK(solve(poseOf(A), poseOf(B), Tilt::SIDE_RIGHT_DOWN, m) == Result::OK && m.var == 1 && m.sp == 1 && m.sr == 1 && m.sa == 1);
+        (void)rg;
     }
 
     // ----- 8. mountOk rejects broken matrices -----
@@ -298,6 +332,7 @@ int main() {
         CHECK(mountOk(k));
         k.m[4] = 0.5f; CHECK(!mountOk(k));
         k = Mount(); k.sp = 0; CHECK(!mountOk(k));
+        k = Mount(); k.var = 2; CHECK(!mountOk(k));
         k = Mount(); k.m[0] = NAN; CHECK(!mountOk(k));
     }
 

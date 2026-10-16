@@ -766,7 +766,7 @@ private:
     const ImuMount::Mount cur = IMU_MOUNT3D;
     const bool keep = cur.valid && ImuMount::mountOk(cur);
     ImuMount::Mount m;
-    if (!ImuMount::fromBoardAngles(yaw, pitch, roll, keep ? cur.sp : 1, keep ? cur.sr : 1, keep ? cur.sa : 1, m)) {
+    if (!ImuMount::fromBoardAngles(yaw, pitch, roll, keep ? cur.sp : 1, keep ? cur.sr : 1, keep ? cur.sa : 1, keep ? cur.var : 1, m)) {
       server.send(400, "text/plain", MSG("IMU mount: the angles are out of range or the board would stand too close to its edge (pitch above 75 deg)"));
       return;
     }
